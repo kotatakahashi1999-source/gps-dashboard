@@ -7,669 +7,187 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --bg: #0d0f12;
-    --bg2: #13161b;
-    --bg3: #1a1e25;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #e8eaed;
-    --muted: #7a8090;
-    --accent: #00e07a;
-    --accent2: #0088ff;
-    --warn: #ff9f1c;
-    --danger: #ff4d4d;
-    --mono: 'DM Mono', monospace;
-    --head: 'Barlow Condensed', sans-serif;
-    --body: 'Barlow', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { background: var(--bg); color: var(--text); font-family: var(--body); font-size: 14px; }
-  body { min-height: 100vh; }
+:root{--bg:#0d0f12;--bg2:#13161b;--bg3:#1a1e25;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8eaed;--muted:#7a8090;--accent:#00e07a;--accent2:#0088ff;--warn:#ff9f1c;--danger:#ff4d4d;--mono:"DM Mono",monospace;--head:"Barlow Condensed",sans-serif;--body:"Barlow",sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px}
+#upload-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden}
+#upload-screen::before{content:"";position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(0,224,122,0.06) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.brand{font-family:var(--head);font-size:13px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:2.5rem;display:flex;align-items:center;gap:8px}
+.brand-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.upload-title{font-family:var(--head);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;line-height:1.1;text-align:center;margin-bottom:1rem}
+.upload-title span{color:var(--accent)}
+.upload-sub{font-size:15px;color:var(--muted);text-align:center;margin-bottom:2.5rem;max-width:420px;line-height:1.6}
+.drop-zone{width:100%;max-width:480px;border:1.5px dashed var(--border2);border-radius:16px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--bg2)}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:rgba(0,224,122,0.04)}
+.drop-icon{width:52px;height:52px;border-radius:12px;background:rgba(0,224,122,0.1);border:1px solid rgba(0,224,122,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:22px}
+.drop-label{font-family:var(--head);font-size:16px;font-weight:600;margin-bottom:6px}
+.drop-hint{font-size:13px;color:var(--muted)}
+.drop-btn{display:inline-block;margin-top:1.25rem;padding:10px 24px;border-radius:8px;background:var(--accent);color:#000;font-family:var(--head);font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border:none;transition:opacity .15s}
+.drop-btn:hover{opacity:.85}
+#file-input{display:none}
+.supported{margin-top:1.5rem;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
+.tag{padding:2px 8px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--muted)}
+.error-banner{margin-top:1rem;padding:10px 16px;background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.3);border-radius:8px;color:#ff8080;font-size:13px;max-width:480px;display:none}
+#col-mapper{display:none;width:100%;max-width:560px;margin-top:1.5rem;background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:1.5rem}
+.mapper-title{font-family:var(--head);font-size:15px;font-weight:600;margin-bottom:1rem}
+.mapper-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mapper-row{display:flex;flex-direction:column;gap:4px}
+.mapper-label{font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.mapper-label .req{color:var(--danger);margin-left:2px}
+.mapper-select{padding:7px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:var(--body);font-size:13px}
+.mapper-confirm{margin-top:1rem;padding:9px 22px;border-radius:8px;background:var(--accent);color:#000;font-family:var(--head);font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border:none}
+#dashboard{display:none;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-brand{font-family:var(--head);font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.session-pill{padding:3px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border2);font-family:var(--mono);font-size:11px;color:var(--muted)}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.topbar-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--text);font-family:var(--head);font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:border-color .15s,color .15s}
+.topbar-btn:hover{border-color:var(--accent);color:var(--accent)}
+.sync-btn{padding:7px 18px;border-radius:8px;border:none;background:var(--accent);color:#000;font-family:var(--head);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .15s}
+.sync-btn:hover{opacity:.85}
+.sync-btn:disabled{opacity:.4;cursor:not-allowed}
+.sync-btn.syncing{background:var(--warn)}
+.sync-btn.synced{background:#1a3a2a;color:var(--accent);border:1px solid rgba(0,224,122,0.3)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+#sync-panel{display:none;margin:0 24px 16px;padding:14px 18px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px}
+.sync-panel-title{font-family:var(--head);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.sync-log{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto}
+.sync-log-item{font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:5px;background:var(--bg3)}
+.sync-log-item.ok{color:var(--accent)}
+.sync-log-item.err{color:var(--danger)}
+.sync-log-item.pending{color:var(--muted)}
+.sync-summary{margin-top:8px;font-size:12px;color:var(--muted);font-family:var(--mono)}
+.tabs{display:flex;padding:0 24px;border-bottom:1px solid var(--border);background:var(--bg)}
+.tab{padding:12px 18px;font-family:var(--head);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{padding:24px}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+.metrics-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.metric-card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);opacity:.5}
+.metric-card.warn::before{background:var(--warn)}
+.metric-card.info::before{background:var(--accent2)}
+.metric-card.danger::before{background:var(--danger)}
+.metric-lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
+.metric-val{font-family:var(--head);font-size:26px;font-weight:700;line-height:1}
+.metric-unit{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
+.chart-row{display:grid;gap:14px;margin-bottom:14px}
+.chart-row.cols-2{grid-template-columns:1fr 1fr}
+.chart-row.cols-1{grid-template-columns:1fr}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px}
+.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.chart-title{font-family:var(--head);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.legend{display:flex;gap:12px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-family:var(--mono)}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+.chart-wrap{position:relative}
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{padding:10px 14px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);text-align:left;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none;background:var(--bg3)}
+.data-table th:hover{color:var(--text)}
+.data-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;white-space:nowrap}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr.clickable:hover td{background:var(--bg3);cursor:pointer}
+.bar-wrap{display:flex;align-items:center;gap:8px}
+.bar-bg{flex:1;height:4px;background:var(--bg3);border-radius:2px;min-width:60px}
+.bar-fill{height:100%;border-radius:2px;background:var(--accent)}
+.load-pill{display:inline-block;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.pill-high{background:rgba(0,224,122,0.12);color:var(--accent);border:1px solid rgba(0,224,122,0.2)}
+.pill-normal{background:rgba(255,159,28,0.1);color:var(--warn);border:1px solid rgba(255,159,28,0.2)}
+.pill-low{background:rgba(255,77,77,0.1);color:var(--danger);border:1px solid rgba(255,77,77,0.2)}
+.rpe-num{font-family:var(--mono);font-size:12px;font-weight:500;padding:2px 8px;border-radius:4px}
+#player-detail{display:none}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--head);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;margin-bottom:20px;transition:color .15s;background:none;border:none;padding:0}
+.back-btn:hover{color:var(--accent)}
+.player-header{display:flex;align-items:center;gap:18px;margin-bottom:20px}
+.player-avatar{width:52px;height:52px;border-radius:12px;background:rgba(0,224,122,0.1);border:1px solid rgba(0,224,122,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:18px;font-weight:700;color:var(--accent)}
+.player-info-name{font-family:var(--head);font-size:24px;font-weight:700}
+.player-info-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
+.player-rpe-badge{margin-left:auto;text-align:right}
+.player-rpe-val{font-family:var(--head);font-size:32px;font-weight:700;line-height:1}
+.player-rpe-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+.detail-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.detail-stat{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.detail-stat-val{font-family:var(--head);font-size:22px;font-weight:700;line-height:1}
+.detail-stat-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:5px;line-height:1.3}
+.rpe-entry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+.rpe-player-row{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rpe-player-name{font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rpe-btns{display:flex;gap:3px}
+.rpe-btn{width:24px;height:24px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .1s;display:flex;align-items:center;justify-content:center}
+.rpe-btn:hover{border-color:var(--warn);color:var(--warn)}
+.rpe-btn.active{background:var(--warn);color:#000;border-color:var(--warn)}
+.compare-upload{background:var(--bg2);border:1.5px dashed var(--border2);border-radius:12px;padding:2rem;text-align:center;margin-bottom:20px}
+.compare-upload-title{font-family:var(--head);font-size:15px;font-weight:600;margin-bottom:6px}
+.compare-upload-sub{font-size:13px;color:var(--muted);margin-bottom:1rem}
+@media(max-width:900px){.metrics-row,.detail-stats{grid-template-columns:repeat(3,1fr)}.chart-row.cols-2{grid-template-columns:1fr}}
+@media(max-width:600px){.metrics-row,.detail-stats{grid-template-columns:repeat(2,1fr)}.topbar,.tab-content{padding:12px 16px}.tabs{padding:0 16px;overflow-x:auto}.mapper-grid{grid-template-columns:1fr}}
 
-  /* UPLOAD SCREEN */
-  #upload-screen {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    background: var(--bg);
-    position: relative;
-    overflow: hidden;
-  }
-  #upload-screen::before {
-    content: '';
-    position: absolute;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(0,224,122,0.06) 0%, transparent 70%);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-  }
-  .brand {
-    font-family: var(--head);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 2.5rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .brand-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-  .upload-title {
-    font-family: var(--head);
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-  .upload-title span { color: var(--accent); }
-  .upload-sub {
-    font-size: 15px;
-    color: var(--muted);
-    text-align: center;
-    margin-bottom: 2.5rem;
-    max-width: 400px;
-    line-height: 1.6;
-  }
-  .drop-zone {
-    width: 100%;
-    max-width: 480px;
-    border: 1.5px dashed var(--border2);
-    border-radius: 16px;
-    padding: 3rem 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    background: var(--bg2);
-    position: relative;
-  }
-  .drop-zone:hover, .drop-zone.dragover {
-    border-color: var(--accent);
-    background: rgba(0,224,122,0.04);
-  }
-  .drop-icon {
-    width: 52px; height: 52px;
-    border-radius: 12px;
-    background: rgba(0,224,122,0.1);
-    border: 1px solid rgba(0,224,122,0.2);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 1.25rem;
-    font-size: 22px;
-  }
-  .drop-label {
-    font-family: var(--head);
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-  .drop-hint { font-size: 13px; color: var(--muted); }
-  .drop-btn {
-    display: inline-block;
-    margin-top: 1.25rem;
-    padding: 10px 24px;
-    border-radius: 8px;
-    background: var(--accent);
-    color: #000;
-    font-family: var(--head);
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border: none;
-    transition: opacity 0.15s;
-  }
-  .drop-btn:hover { opacity: 0.85; }
-  #file-input { display: none; }
-  .supported {
-    margin-top: 1.5rem;
-    font-size: 12px;
-    color: var(--muted);
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .tag {
-    padding: 2px 8px;
-    border-radius: 4px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .error-banner {
-    margin-top: 1rem;
-    padding: 10px 16px;
-    background: rgba(255,77,77,0.1);
-    border: 1px solid rgba(255,77,77,0.3);
-    border-radius: 8px;
-    color: #ff8080;
-    font-size: 13px;
-    max-width: 480px;
-    display: none;
-  }
-
-  /* COL MAPPER */
-  #col-mapper {
-    display: none;
-    width: 100%;
-    max-width: 560px;
-    margin-top: 1.5rem;
-    background: var(--bg2);
-    border: 1px solid var(--border2);
-    border-radius: 16px;
-    padding: 1.5rem;
-  }
-  .mapper-title {
-    font-family: var(--head);
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--text);
-  }
-  .mapper-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .mapper-row { display: flex; flex-direction: column; gap: 4px; }
-  .mapper-label {
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-  .mapper-label .req { color: var(--danger); margin-left: 2px; }
-  .mapper-select {
-    padding: 7px 10px;
-    border-radius: 7px;
-    border: 1px solid var(--border2);
-    background: var(--bg3);
-    color: var(--text);
-    font-family: var(--body);
-    font-size: 13px;
-  }
-  .mapper-confirm {
-    margin-top: 1rem;
-    padding: 9px 22px;
-    border-radius: 8px;
-    background: var(--accent);
-    color: #000;
-    font-family: var(--head);
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border: none;
-  }
-  .mapper-confirm:hover { opacity: 0.85; }
-
-  /* DASHBOARD */
-  #dashboard { display: none; min-height: 100vh; background: var(--bg); }
-
-  /* TOPBAR */
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 24px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .topbar-left { display: flex; align-items: center; gap: 14px; }
-  .topbar-brand {
-    font-family: var(--head);
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  .session-pill {
-    padding: 3px 10px;
-    border-radius: 20px;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-  }
-  .topbar-right { display: flex; gap: 8px; align-items: center; }
-  .new-session-btn {
-    padding: 6px 14px;
-    border-radius: 7px;
-    border: 1px solid var(--border2);
-    background: transparent;
-    color: var(--text);
-    font-family: var(--head);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .new-session-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* TABS */
-  .tabs {
-    display: flex;
-    gap: 0;
-    padding: 0 24px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-  }
-  .tab {
-    padding: 12px 18px;
-    font-family: var(--head);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
-    white-space: nowrap;
-  }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  /* CONTENT */
-  .tab-content { padding: 24px; }
-  .tab-pane { display: none; }
-  .tab-pane.active { display: block; }
-
-  /* METRIC CARDS */
-  .metrics-row {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .metric-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-  .metric-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--accent);
-    opacity: 0.5;
-  }
-  .metric-card.warn::before { background: var(--warn); }
-  .metric-card.info::before { background: var(--accent2); }
-  .metric-lbl {
-    font-family: var(--mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-  .metric-val {
-    font-family: var(--head);
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-  }
-  .metric-unit {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-  .metric-card.rpe .metric-val { color: var(--warn); }
-
-  /* CHART CARDS */
-  .chart-row { display: grid; gap: 14px; margin-bottom: 14px; }
-  .chart-row.cols-2 { grid-template-columns: 1fr 1fr; }
-  .chart-row.cols-1 { grid-template-columns: 1fr; }
-  .chart-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px;
-  }
-  .chart-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .chart-title {
-    font-family: var(--head);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .legend { display: flex; gap: 12px; flex-wrap: wrap; }
-  .leg-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: var(--muted);
-    font-family: var(--mono);
-  }
-  .leg-dot { width: 8px; height: 8px; border-radius: 2px; }
-  .chart-wrap { position: relative; }
-
-  /* PLAYER TABLE */
-  .table-wrap {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .data-table { width: 100%; border-collapse: collapse; }
-  .data-table th {
-    padding: 10px 14px;
-    font-family: var(--mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    white-space: nowrap;
-    user-select: none;
-    background: var(--bg3);
-  }
-  .data-table th:hover { color: var(--text); }
-  .data-table td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    white-space: nowrap;
-  }
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr.clickable:hover td { background: var(--bg3); cursor: pointer; }
-  .player-name-cell { font-weight: 500; color: var(--text); }
-  .bar-wrap { display: flex; align-items: center; gap: 8px; }
-  .bar-bg {
-    flex: 1;
-    height: 4px;
-    background: var(--bg3);
-    border-radius: 2px;
-    min-width: 60px;
-  }
-  .bar-fill { height: 100%; border-radius: 2px; background: var(--accent); }
-  .load-pill {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-  .pill-high { background: rgba(0,224,122,0.12); color: var(--accent); border: 1px solid rgba(0,224,122,0.2); }
-  .pill-normal { background: rgba(255,159,28,0.1); color: var(--warn); border: 1px solid rgba(255,159,28,0.2); }
-  .pill-low { background: rgba(255,77,77,0.1); color: var(--danger); border: 1px solid rgba(255,77,77,0.2); }
-  .rpe-num {
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: 500;
-    padding: 2px 8px;
-    border-radius: 4px;
-  }
-
-  /* PLAYER DETAIL */
-  #player-detail { display: none; }
-  .back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--head);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-    cursor: pointer;
-    margin-bottom: 20px;
-    transition: color 0.15s;
-    background: none;
-    border: none;
-    padding: 0;
-  }
-  .back-btn:hover { color: var(--accent); }
-  .player-header {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 20px;
-  }
-  .player-avatar {
-    width: 52px; height: 52px;
-    border-radius: 12px;
-    background: rgba(0,224,122,0.1);
-    border: 1px solid rgba(0,224,122,0.2);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--head);
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-  .player-info-name {
-    font-family: var(--head);
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-  .player-info-sub {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 3px;
-  }
-  .player-rpe-badge {
-    margin-left: auto;
-    text-align: right;
-  }
-  .player-rpe-val {
-    font-family: var(--head);
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--warn);
-    line-height: 1;
-  }
-  .player-rpe-lbl {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 2px;
-  }
-  .detail-stats {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .detail-stat {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    text-align: center;
-  }
-  .detail-stat-val {
-    font-family: var(--head);
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1;
-  }
-  .detail-stat-lbl {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 5px;
-    line-height: 1.3;
-  }
-
-  /* COMPARE */
-  .compare-upload {
-    background: var(--bg2);
-    border: 1.5px dashed var(--border2);
-    border-radius: 12px;
-    padding: 2rem;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .compare-upload-title {
-    font-family: var(--head);
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 6px;
-  }
-  .compare-upload-sub { font-size: 13px; color: var(--muted); margin-bottom: 1rem; }
-
-  /* MANUAL RPE */
-  .rpe-entry-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px;
-    margin-top: 12px;
-  }
-  .rpe-player-row {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .rpe-player-name {
-    font-size: 13px;
-    font-weight: 500;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .rpe-btns { display: flex; gap: 3px; }
-  .rpe-btn {
-    width: 24px; height: 24px;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.1s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .rpe-btn:hover { border-color: var(--warn); color: var(--warn); }
-  .rpe-btn.active { background: var(--warn); color: #000; border-color: var(--warn); }
-
-  /* RESPONSIVE */
-  @media (max-width: 900px) {
-    .metrics-row { grid-template-columns: repeat(3, 1fr); }
-    .detail-stats { grid-template-columns: repeat(3, 1fr); }
-    .chart-row.cols-2 { grid-template-columns: 1fr; }
-  }
-  @media (max-width: 600px) {
-    .metrics-row { grid-template-columns: repeat(2, 1fr); }
-    .detail-stats { grid-template-columns: repeat(2, 1fr); }
-    .topbar { padding: 12px 16px; }
-    .tab-content { padding: 16px; }
-    .tabs { padding: 0 16px; overflow-x: auto; }
-    .mapper-grid { grid-template-columns: 1fr; }
-  }
+.trend-up{color:#00e07a}
+.trend-down{color:#ff4d4d}
+.trend-flat{color:#7a8090}
+.spark{display:inline-flex;align-items:flex-end;gap:2px;height:20px;vertical-align:middle}
+.spark-bar{width:5px;border-radius:2px;background:#00e07a;opacity:.7;min-height:2px}
 </style>
 </head>
 <body>
-
-<!-- UPLOAD SCREEN -->
 <div id="upload-screen">
-  <div class="brand"><div class="brand-dot"></div>Sporting Jax · GPS Analytics</div>
-  <div class="upload-title">Drop your session.<br><span>See it instantly.</span></div>
-  <div class="upload-sub">Upload any PlayerData CSV export — team overview, player deep-dives and sprint charts appear automatically.</div>
+  <div class="brand"><div class="brand-dot"></div>Sporting Jax &middot; GPS Analytics</div>
+  <div class="upload-title">Drop your session.<br><span>Sync to Notion instantly.</span></div>
+  <div class="upload-sub">Upload any PlayerData CSV &mdash; charts appear immediately, then one click syncs everything to your Notion databases.</div>
   <div class="drop-zone" id="dropzone">
-    <div class="drop-icon">📂</div>
-    <div class="drop-label">Drag & drop your CSV here</div>
-    <div class="drop-hint">PlayerData session export</div>
+    <div class="drop-icon">&#128194;</div>
+    <div class="drop-label">Drag &amp; drop your CSV here</div>
+    <div class="drop-hint">PlayerData session export</div><div id="auto-sync-hint" style="margin-top:8px;font-size:11px;font-family:'DM Mono',monospace;color:#00e07a;display:none">Notion key saved ✓ — will auto-sync on upload</div>
     <button class="drop-btn" onclick="document.getElementById('file-input').click()">Choose file</button>
     <input type="file" id="file-input" accept=".csv,.txt">
   </div>
-  <div class="supported">
-    Detects columns automatically &nbsp;·&nbsp;
-    <span class="tag">Total Distance</span>
-    <span class="tag">HMLD</span>
-    <span class="tag">Low Sprint</span>
-    <span class="tag">High Sprint</span>
-    <span class="tag">RPE</span>
-  </div>
+  <div class="supported">Auto-detects columns &nbsp;&middot;&nbsp;<span class="tag">Total Distance</span><span class="tag">HMLD</span><span class="tag">Low Sprint</span><span class="tag">High Sprint</span><span class="tag">RPE</span></div>
   <div class="error-banner" id="error-banner"></div>
   <div id="col-mapper">
     <div class="mapper-title">Map your CSV columns</div>
     <div class="mapper-grid" id="mapper-grid"></div>
-    <button class="mapper-confirm" onclick="confirmMapping()">Confirm & view dashboard →</button>
+    <button class="mapper-confirm" onclick="confirmMapping()">Confirm &amp; view dashboard &rarr;</button>
   </div>
 </div>
-
-<!-- DASHBOARD -->
 <div id="dashboard">
   <div class="topbar">
     <div class="topbar-left">
       <div class="topbar-brand">Sporting Jax</div>
-      <div class="session-pill" id="session-pill">—</div>
+      <div class="session-pill" id="session-pill">&mdash;</div>
     </div>
     <div class="topbar-right">
-      <button class="new-session-btn" onclick="newSession()">+ New session</button>
+      <button class="topbar-btn" onclick="newSession()">+ New session</button>
+      <button class="sync-btn" id="sync-btn" onclick="syncToNotion()"><div class="sync-dot"></div>Sync to Notion</button>
     </div>
+  </div>
+  <div id="key-banner" style="display:none;margin:0 24px 0;padding:12px 18px;background:#1a1e25;border:1px solid rgba(255,159,28,0.3);border-radius:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-family:'DM Mono',monospace;font-size:11px;color:#ff9f1c;text-transform:uppercase;letter-spacing:.08em">Notion key required</span>
+    <input id="key-input" type="password" placeholder="Paste your Notion API key (ntn_...)" style="flex:1;min-width:200px;padding:7px 12px;border-radius:7px;border:1px solid rgba(255,255,255,0.12);background:#0d0f12;color:#e8eaed;font-family:'DM Mono',monospace;font-size:12px">
+    <button onclick="saveKey()" style="padding:7px 16px;border-radius:7px;border:none;background:#00e07a;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">Save</button>
+    <button onclick="document.getElementById('key-banner').style.display='none'" style="padding:7px 12px;border-radius:7px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:#7a8090;font-size:12px;cursor:pointer">Dismiss</button>
+  </div>
+  <div id="sync-panel">
+    <div class="sync-panel-title">Notion sync</div>
+    <div class="sync-log" id="sync-log"></div>
+    <div class="sync-summary" id="sync-summary"></div>
   </div>
   <div class="tabs">
     <div class="tab active" onclick="showTab('team')">Team Overview</div>
     <div class="tab" onclick="showTab('players')">Player List</div>
     <div class="tab" onclick="showTab('compare')">Compare Sessions</div>
+    <div class="tab" onclick="showTab('trends')">Season Trends</div>
   </div>
   <div class="tab-content">
-    <!-- TEAM TAB -->
     <div class="tab-pane active" id="tab-team">
       <div class="metrics-row" id="team-metrics"></div>
       <div class="chart-row cols-1">
         <div class="chart-card">
           <div class="chart-head">
-            <div class="chart-title">Distance metrics — all players</div>
+            <div class="chart-title">Distance metrics &mdash; all players</div>
             <div class="legend">
               <div class="leg-item"><div class="leg-dot" style="background:#00e07a"></div>Total dist</div>
               <div class="leg-item"><div class="leg-dot" style="background:#0088ff"></div>HMLD</div>
@@ -680,67 +198,47 @@
           <div class="chart-wrap" style="height:280px"><canvas id="teamDistChart"></canvas></div>
         </div>
       </div>
-      <div class="chart-row cols-2" id="sprint-rpe-row">
+      <div class="chart-row cols-2">
         <div class="chart-card" id="sprint-card" style="display:none">
           <div class="chart-head">
             <div class="chart-title">Sprint zones per player</div>
-            <div class="legend">
-              <div class="leg-item"><div class="leg-dot" style="background:#ff9f1c"></div>Low sprint</div>
-              <div class="leg-item"><div class="leg-dot" style="background:#ff4d4d"></div>High sprint</div>
-            </div>
+            <div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#ff9f1c"></div>Low sprint</div><div class="leg-item"><div class="leg-dot" style="background:#ff4d4d"></div>High sprint</div></div>
           </div>
           <div class="chart-wrap" id="sprint-chart-wrap" style="height:240px"><canvas id="sprintChart"></canvas></div>
         </div>
         <div class="chart-card" id="rpe-card">
           <div class="chart-head"><div class="chart-title">RPE by player</div></div>
-          <div id="rpe-chart-area">
-            <div id="rpe-chart-wrap" style="display:none"><div class="chart-wrap" id="rpe-chart-inner" style="height:240px"><canvas id="rpeChart"></canvas></div></div>
-            <div id="rpe-manual">
-              <div style="font-size:13px;color:var(--muted);margin-bottom:10px">RPE not in CSV — enter manually below:</div>
-              <div class="rpe-entry-grid" id="rpe-grid"></div>
-            </div>
-          </div>
+          <div id="rpe-chart-wrap" style="display:none"><div class="chart-wrap" id="rpe-chart-inner" style="height:240px"><canvas id="rpeChart"></canvas></div></div>
+          <div id="rpe-manual"><div style="font-size:13px;color:var(--muted);margin-bottom:10px">RPE not in CSV &mdash; enter manually:</div><div class="rpe-entry-grid" id="rpe-grid"></div></div>
         </div>
       </div>
     </div>
-
-    <!-- PLAYERS TAB -->
     <div class="tab-pane" id="tab-players">
       <div class="table-wrap">
         <table class="data-table" id="player-table">
-          <thead>
-            <tr>
-              <th onclick="sortBy('name')">Player</th>
-              <th onclick="sortBy('total')">Total dist (m)</th>
-              <th onclick="sortBy('hmld')">HMLD (m)</th>
-              <th onclick="sortBy('lsprint')">Low sprint (m)</th>
-              <th onclick="sortBy('hsprint')">High sprint (m)</th>
-              <th onclick="sortBy('maxspeed')">Max speed (km/h)</th>
-              <th onclick="sortBy('rpe')">RPE</th>
-              <th>Load</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th onclick="sortBy('name')">Player</th>
+            <th onclick="sortBy('total')">Total dist (m)</th>
+            <th onclick="sortBy('hmld')">HMLD (m)</th>
+            <th onclick="sortBy('lsprint')">Low sprint (m)</th>
+            <th onclick="sortBy('hsprint')">High sprint (m)</th>
+            <th onclick="sortBy('maxspeed')">Max speed (km/h)</th>
+            <th onclick="sortBy('rpe')">RPE</th>
+            <th>Load</th>
+          </tr></thead>
           <tbody id="player-tbody"></tbody>
         </table>
       </div>
       <div id="player-detail">
-        <button class="back-btn" onclick="closeDetail()">← Back to squad</button>
+        <button class="back-btn" onclick="closeDetail()">&larr; Back to squad</button>
         <div class="player-header" id="player-header"></div>
         <div class="detail-stats" id="detail-stats"></div>
         <div class="chart-row cols-2">
-          <div class="chart-card">
-            <div class="chart-head"><div class="chart-title">vs squad average</div></div>
-            <div class="chart-wrap" style="height:220px"><canvas id="playerVsChart"></canvas></div>
-          </div>
-          <div class="chart-card" id="rpe-dist-card" style="display:none">
-            <div class="chart-head"><div class="chart-title">RPE — squad distribution</div></div>
-            <div class="chart-wrap" id="rpe-dist-wrap" style="height:220px"><canvas id="rpeDistChart"></canvas></div>
-          </div>
+          <div class="chart-card"><div class="chart-head"><div class="chart-title">vs squad average</div></div><div class="chart-wrap" style="height:220px"><canvas id="playerVsChart"></canvas></div></div>
+          <div class="chart-card" id="rpe-dist-card" style="display:none"><div class="chart-head"><div class="chart-title">RPE &mdash; squad distribution</div></div><div class="chart-wrap" style="height:220px"><canvas id="rpeDistChart"></canvas></div></div>
         </div>
       </div>
     </div>
-
-    <!-- COMPARE TAB -->
     <div class="tab-pane" id="tab-compare">
       <div class="compare-upload" id="compare-upload">
         <div class="compare-upload-title">Compare with another session</div>
@@ -749,525 +247,564 @@
         <input type="file" id="cmp-input" accept=".csv,.txt" style="display:none">
       </div>
       <div id="compare-charts"></div>
+
+    <div class="tab-pane" id="tab-trends">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <select id="trends-metric" onchange="renderTrends()" style="padding:7px 12px;border-radius:7px;border:1px solid rgba(255,255,255,0.12);background:#1a1e25;color:#e8eaed;font-family:'DM Mono',monospace;font-size:12px">
+            <option value="total">Total Distance</option>
+            <option value="hmld">HMLD</option>
+            <option value="lsprint">Low Sprint</option>
+            <option value="hsprint">High Sprint</option>
+            <option value="rpe">RPE</option>
+          </select>
+          <select id="trends-player" onchange="renderTrends()" style="padding:7px 12px;border-radius:7px;border:1px solid rgba(255,255,255,0.12);background:#1a1e25;color:#e8eaed;font-family:'DM Mono',monospace;font-size:12px">
+            <option value="all">All players + team avg</option>
+          </select>
+        </div>
+        <button onclick="loadTrendsFromNotion()" id="trends-load-btn" style="padding:7px 16px;border-radius:7px;border:none;background:#00e07a;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">Load from Notion</button>
+      </div>
+      <div id="trends-status" style="display:none;font-family:'DM Mono',monospace;font-size:12px;color:#7a8090;margin-bottom:12px;padding:10px 14px;background:#1a1e25;border-radius:8px"></div>
+      <div class="chart-card" style="margin-bottom:14px">
+        <div class="chart-head">
+          <div class="chart-title" id="trends-chart-title">Season trend</div>
+          <div class="legend" id="trends-legend"></div>
+        </div>
+        <div class="chart-wrap" style="height:320px"><canvas id="trendsLineChart"></canvas></div>
+      </div>
+      <div class="chart-row cols-2">
+        <div class="chart-card">
+          <div class="chart-head"><div class="chart-title">Session averages over time</div></div>
+          <div class="chart-wrap" style="height:220px"><canvas id="trendsAvgChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><div class="chart-title">Peak values per session</div></div>
+          <div class="chart-wrap" style="height:220px"><canvas id="trendsPeakChart"></canvas></div>
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-top:14px">
+        <table class="data-table" id="trends-table">
+          <thead><tr>
+            <th>Player</th>
+            <th id="th-sessions">Sessions</th>
+            <th id="th-avg">Avg</th>
+            <th id="th-peak">Peak</th>
+            <th id="th-trend">Trend</th>
+          </tr></thead>
+          <tbody id="trends-tbody"></tbody>
+        </table>
+      </div>
+    </div>
     </div>
   </div>
 </div>
-
 <script>
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let sessions = [];
-let currentSession = null;
-let sortCol = 'total', sortDir = -1;
-let charts = {};
+const NOTION_KEY=localStorage.getItem("notion_key")||"";
+const SESSIONS_DB="1ed0c8a6f3c043a5aeb6540786ce95dd";
+const LOADS_DB="d2ae7f2baea74079b78726da2b294523";
+const NV="2022-06-28";
+const PROXY="https://corsproxy.io/?";
+let sessions=[],currentSession=null,sortCol="total",sortDir=-1,charts={};
+const FIELDS={name:{label:"Player name",req:true,aliases:["name","player","athlete","playername","player name","full name","athlete name"]},total:{label:"Total distance",req:true,aliases:["total distance","totaldistance","distance (m)","distance","total dist"]},hmld:{label:"HMLD",req:false,aliases:["hmld","high metabolic load distance","high metabolic load","hml distance","hml dist"]},lsprint:{label:"Low sprint",req:false,aliases:["low sprint","low sprint distance","low sprint (70+)","low sprint(70+)","sprint zone 1"]},hsprint:{label:"High sprint",req:false,aliases:["high sprint","high sprint distance","high sprint (85+)","high sprint(85+)","sprint zone 2"]},maxspeed:{label:"Max speed",req:false,aliases:["max speed","maxspeed","session max vel","max vel","top speed","peak speed"]},rpe:{label:"RPE",req:false,aliases:["rpe","rating of perceived exertion","session rpe","rpe score"]},date:{label:"Date",req:false,aliases:["date","session date"]}};
+function parseCSV(text){const lines=text.trim().split(/
+?
+/);const headers=splitLine(lines[0]).map(h=>h.replace(/^﻿/,"").trim());const rows=[];for(let i=1;i<lines.length;i++){if(!lines[i].trim())continue;const vals=splitLine(lines[i]);const obj={};headers.forEach((h,idx)=>obj[h]=(vals[idx]||"").trim());rows.push(obj);}return{headers,rows};}
+function splitLine(line){const res=[];let cur="",inQ=false;for(const ch of line){if(ch==='"')inQ=!inQ;else if(ch===","&&!inQ){res.push(cur);cur="";}else cur+=ch;}res.push(cur);return res;}
+function detectCol(headers,field){const aliases=FIELDS[field].aliases;for(const h of headers){const low=h.toLowerCase().trim();if(aliases.some(a=>low===a||low.includes(a)))return h;}return null;}
+function parseNum(v){if(!v&&v!==0)return null;const n=parseFloat(String(v).replace(/,/g,""));return isNaN(n)?null:n;}
+function initDropzone(){const dz=document.getElementById("dropzone"),inp=document.getElementById("file-input");dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("dragover");});dz.addEventListener("dragleave",()=>dz.classList.remove("dragover"));dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("dragover");if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});inp.addEventListener("change",()=>{if(inp.files[0])handleFile(inp.files[0]);inp.value="";});document.getElementById("cmp-input").addEventListener("change",function(){if(this.files[0])handleCmpFile(this.files[0]);this.value="";});}
+function handleFile(file){const r=new FileReader();r.onload=e=>processCSV(e.target.result,file.name);r.readAsText(file);}
+function processCSV(text,filename){const{headers,rows}=parseCSV(text);const mapped={};let needsMapping=false;for(const field of Object.keys(FIELDS)){const found=detectCol(headers,field);if(found)mapped[field]=found;else if(FIELDS[field].req)needsMapping=true;}if(needsMapping)showMapper(headers,mapped,rows,filename);else buildSession(rows,mapped,filename);}
+function showMapper(headers,autoMapped,rows,filename){const grid=document.getElementById("mapper-grid");grid.innerHTML="";for(const[field,meta]of Object.entries(FIELDS)){const sel=autoMapped[field]||"";const div=document.createElement("div");div.className="mapper-row";div.innerHTML=`<div class="mapper-label">${meta.label}${meta.req?"<span class='req'>*</span>":""}</div><select class="mapper-select" id="map_${field}"><option value="">skip</option>${headers.map(h=>`<option value="${h}"${h===sel?" selected":""}>${h}</option>`).join("")}</select>`;grid.appendChild(div);}document.getElementById("col-mapper").style.display="block";window._pendingRows=rows;window._pendingFilename=filename;}
+function confirmMapping(){const mapped={};for(const f of Object.keys(FIELDS)){const el=document.getElementById("map_"+f);if(el&&el.value)mapped[f]=el.value;}if(!mapped.name||!mapped.total){showError("Please map at least Player name and Total distance.");return;}document.getElementById("col-mapper").style.display="none";buildSession(window._pendingRows,mapped,window._pendingFilename);}
+function buildSession(rows,colMap,filename){const players=rows.map(r=>({name:r[colMap.name]?.trim()||"Unknown",total:parseNum(r[colMap.total]),hmld:colMap.hmld?parseNum(r[colMap.hmld]):null,lsprint:colMap.lsprint?parseNum(r[colMap.lsprint]):null,hsprint:colMap.hsprint?parseNum(r[colMap.hsprint]):null,maxspeed:colMap.maxspeed?parseNum(r[colMap.maxspeed]):null,rpe:colMap.rpe?parseNum(r[colMap.rpe]):null,date:colMap.date?r[colMap.date]:null})).filter(p=>p.name!=="Unknown"&&p.total>0);if(!players.length){showError("No valid player rows found.");return;}let sessionDate=null;if(players[0].date){const d=new Date(players[0].date);if(!isNaN(d))sessionDate=d.toISOString().split("T")[0];}const session={name:filename.replace(/\.(csv|txt)$/i,""),players,date:sessionDate,synced:false};sessions.push(session);currentSession=session;const btn=document.getElementById("sync-btn");btn.className="sync-btn";btn.innerHTML="<div class='sync-dot'></div>Sync to Notion";btn.disabled=false;document.getElementById("sync-panel").style.display="none";document.getElementById("upload-screen").style.display="none";document.getElementById("dashboard").style.display="block";document.getElementById("session-pill").textContent=session.name;checkKeyBanner();showTab("team");autoSyncAndRefreshTrends();}
+function showError(msg){const el=document.getElementById("error-banner");el.textContent=msg;el.style.display="block";}
+function newSession(){document.getElementById("upload-screen").style.display="flex";document.getElementById("dashboard").style.display="none";document.getElementById("error-banner").style.display="none";document.getElementById("col-mapper").style.display="none";destroyAllCharts();}
+async function notionReq(endpoint,method,body){const url=PROXY+encodeURIComponent("https://api.notion.com/v1/"+endpoint);const res=await fetch(url,{method,headers:{"Authorization":"Bearer "+(localStorage.getItem("notion_key")||""),"Notion-Version":NV,"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});const data=await res.json();if(!res.ok)throw new Error(data.message||"Notion error");return data;}
+function addLog(msg,status="ok"){const log=document.getElementById("sync-log");const item=document.createElement("div");item.className="sync-log-item "+status;item.textContent=(status==="ok"?"checkmark ":status==="err"?"x ":"- ")+msg;log.appendChild(item);log.scrollTop=log.scrollHeight;}
+function guessType(name){const l=name.toLowerCase();if(l.includes("md+1"))return"Match Day +1";if(l.includes("md-1")||l.includes("md-2"))return"Match Day -1";if(l.includes("match"))return"Match Day";if(l.includes("recov"))return"Recovery";return"Training";}
 
-const FIELDS = {
-  name:     { label:'Player name',     req:true,  aliases:['name','player','athlete','playername','player name','full name','athlete name'] },
-  total:    { label:'Total distance',  req:true,  aliases:['total distance','totaldistance','total_distance','distance (m)','distance','total dist'] },
-  hmld:     { label:'HMLD',            req:false, aliases:['hmld','high metabolic load distance','high metabolic load','hml distance','hml dist'] },
-  lsprint:  { label:'Low sprint',      req:false, aliases:['low sprint','low sprint distance','low sprint dist','low sprint (70+)','low sprint(70+)','sprint zone 1'] },
-  hsprint:  { label:'High sprint',     req:false, aliases:['high sprint','high sprint distance','high sprint dist','high sprint (85+)','high sprint(85+)','sprint zone 2'] },
-  maxspeed: { label:'Max speed',       req:false, aliases:['max speed','maxspeed','session max vel','max vel','top speed','peak speed','session max velocity'] },
-  rpe:      { label:'RPE',             req:false, aliases:['rpe','rating of perceived exertion','session rpe','rpe score'] },
-  date:     { label:'Date',            req:false, aliases:['date','session date'] },
-};
+async function autoSyncAndRefreshTrends(){
+  const key=localStorage.getItem("notion_key")||"";
+  if(!key)return; // no key yet — user will use manual sync button
+  // Show subtle syncing indicator on sync button
+  const btn=document.getElementById("sync-btn");
+  btn.className="sync-btn syncing";
+  btn.innerHTML="<div class='sync-dot'></div>Syncing...";
+  btn.disabled=true;
+  await syncToNotionSilent();
+  await loadTrendsFromNotion();
+}
 
-// ─── CSV PARSE ────────────────────────────────────────────────────────────────
-function parseCSV(text) {
-  const lines = text.trim().split(/\r?\n/);
-  if (!lines.length) return { headers:[], rows:[] };
-  const headers = splitLine(lines[0]).map(h => h.replace(/^\uFEFF/,'').trim());
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    if (!lines[i].trim()) continue;
-    const vals = splitLine(lines[i]);
-    const obj = {};
-    headers.forEach((h, idx) => obj[h] = (vals[idx] || '').trim());
-    rows.push(obj);
+async function syncToNotionSilent(){
+  if(!currentSession||currentSession.synced)return;
+  const key=localStorage.getItem("notion_key")||"";
+  if(!key)return;
+  const btn=document.getElementById("sync-btn");
+  const panel=document.getElementById("sync-panel");
+  const log=document.getElementById("sync-log");
+  const summary=document.getElementById("sync-summary");
+  panel.style.display="block";
+  log.innerHTML="";
+  summary.textContent="";
+  let ok=0,fail=0;
+  try{
+    addLog("Creating session...","pending");
+    const sb={parent:{database_id:SESSIONS_DB},properties:{"Session Name":{title:[{text:{content:currentSession.name}}]},"Session Type":{select:{name:guessType(currentSession.name)}}}};
+    if(currentSession.date)sb.properties["Date"]={date:{start:currentSession.date}};
+    await notionReq("pages","POST",sb);
+    addLog("Session: "+currentSession.name);ok++;
+    addLog("Syncing "+currentSession.players.length+" players...","pending");
+    for(const pl of currentSession.players){
+      try{
+        const props={"Entry":{title:[{text:{content:pl.name+" - "+currentSession.name}}]}};
+        if(pl.total!==null)props["Total Distance (m)"]={number:pl.total};
+        if(pl.hmld!==null)props["HMLD (m)"]={number:pl.hmld};
+        if(pl.lsprint!==null)props["Low Sprint (m)"]={number:pl.lsprint};
+        if(pl.hsprint!==null)props["High Sprint (m)"]={number:pl.hsprint};
+        if(pl.maxspeed!==null)props["Max Speed (km/h)"]={number:pl.maxspeed};
+        if(pl.rpe!==null)props["RPE"]={number:pl.rpe};
+        const lr=loadRating(pl,currentSession.players);
+        props["Load Rating"]={select:{name:lr.charAt(0).toUpperCase()+lr.slice(1)}};
+        await notionReq("pages","POST",{parent:{database_id:LOADS_DB},properties:props});
+        addLog(pl.name);ok++;
+      }catch(e){addLog(pl.name+": "+e.message,"err");fail++;}
+    }
+    currentSession.synced=true;
+    btn.className="sync-btn synced";
+    btn.innerHTML="<div class='sync-dot'></div>Synced";
+    btn.disabled=true;
+    const now=new Date();summary.textContent=ok+" records synced to Notion"+(fail?" - "+fail+" failed":"")+". Last synced: "+now.toLocaleTimeString();
+  }catch(e){
+    addLog("Failed: "+e.message,"err");
+    btn.className="sync-btn";
+    btn.innerHTML="<div class='sync-dot'></div>Retry sync";
+    btn.disabled=false;
+    summary.textContent="Auto-sync failed - click Retry sync manually.";
   }
-  return { headers, rows };
 }
-function splitLine(line) {
-  const res = []; let cur = '', inQ = false;
-  for (const ch of line) {
-    if (ch === '"') inQ = !inQ;
-    else if (ch === ',' && !inQ) { res.push(cur); cur = ''; }
-    else cur += ch;
+
+async function syncToNotion(){if(!currentSession)return;const btn=document.getElementById("sync-btn"),panel=document.getElementById("sync-panel"),log=document.getElementById("sync-log"),summary=document.getElementById("sync-summary");btn.className="sync-btn syncing";btn.innerHTML="<div class='sync-dot'></div>Syncing...";btn.disabled=true;panel.style.display="block";log.innerHTML="";summary.textContent="";let ok=0,fail=0;try{addLog("Creating session record...","pending");const sb={parent:{database_id:SESSIONS_DB},properties:{"Session Name":{title:[{text:{content:currentSession.name}}]},"Session Type":{select:{name:guessType(currentSession.name)}}}};if(currentSession.date)sb.properties["Date"]={date:{start:currentSession.date}};await notionReq("pages","POST",sb);addLog("Session: "+currentSession.name);ok++;addLog("Syncing "+currentSession.players.length+" players...","pending");for(const pl of currentSession.players){try{const props={"Entry":{title:[{text:{content:pl.name+" - "+currentSession.name}}]}};if(pl.total!==null)props["Total Distance (m)"]={number:pl.total};if(pl.hmld!==null)props["HMLD (m)"]={number:pl.hmld};if(pl.lsprint!==null)props["Low Sprint (m)"]={number:pl.lsprint};if(pl.hsprint!==null)props["High Sprint (m)"]={number:pl.hsprint};if(pl.maxspeed!==null)props["Max Speed (km/h)"]={number:pl.maxspeed};if(pl.rpe!==null)props["RPE"]={number:pl.rpe};const lr=loadRating(pl,currentSession.players);props["Load Rating"]={select:{name:lr.charAt(0).toUpperCase()+lr.slice(1)}};await notionReq("pages","POST",{parent:{database_id:LOADS_DB},properties:props});addLog(pl.name);ok++;}catch(e){addLog(pl.name+": "+e.message,"err");fail++;}}currentSession.synced=true;btn.className="sync-btn synced";btn.innerHTML="<div class='sync-dot'></div>Synced";btn.disabled=true;summary.textContent=ok+" records synced"+(fail?" - "+fail+" failed":"");await loadTrendsFromNotion();}catch(e){addLog("Failed: "+e.message,"err");btn.className="sync-btn";btn.innerHTML="<div class='sync-dot'></div>Retry sync";btn.disabled=false;summary.textContent="Sync failed - check your Notion integration and retry.";}}
+function showTab(tab){document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",["team","players","compare"][i]===tab));document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active"));document.getElementById("tab-"+tab).classList.add("active");document.getElementById("player-table").style.display="";document.getElementById("player-detail").style.display="none";if(tab==="team")renderTeam();if(tab==="players")renderPlayerTable();if(tab==="compare")renderCompare();if(tab==="trends"){if(trendsData.length===0){loadTrendsFromNotion();}else{renderTrends();}}}
+function avg(arr,key){const v=arr.map(p=>p[key]).filter(v=>v!==null&&!isNaN(v));return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
+function has(key){return currentSession.players.some(p=>p[key]!==null&&p[key]>0);}
+function fmt(v,d=0){return v!==null&&!isNaN(v)?v.toFixed(d):"--";}
+function fmtK(v){return v!==null&&!isNaN(v)?Math.round(v).toLocaleString():"--";}
+function rpeColor(v){return v<=3?"#00e07a":v<=6?"#ff9f1c":"#ff4d4d";}
+function rpeLabel(v){return v<=3?"Easy":v<=5?"Moderate":v<=7?"Hard":"Very hard";}
+function loadRating(player,players){const a=avg(players,"total");if(!a)return"normal";const r=player.total/a;return r>=1.1?"high":r>=0.85?"normal":"low";}
+function destroyAllCharts(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};}
+function destroyChart(id){if(charts[id]){try{charts[id].destroy()}catch(e){}delete charts[id];}}
+const GC={color:"#e8eaed",grid:"rgba(255,255,255,0.05)"};
+function renderTeam(){const p=currentSession.players;const aT=avg(p,"total"),aH=avg(p,"hmld"),aL=avg(p,"lsprint"),aS=avg(p,"hsprint"),aR=avg(p,"rpe");document.getElementById("team-metrics").innerHTML=`<div class="metric-card"><div class="metric-lbl">Avg total distance</div><div class="metric-val">${aT?Math.round(aT/100)/10+"k":"--"}</div><div class="metric-unit">metres</div></div><div class="metric-card info"><div class="metric-lbl">Avg HMLD</div><div class="metric-val">${fmtK(aH)}</div><div class="metric-unit">metres</div></div><div class="metric-card warn"><div class="metric-lbl">Avg low sprint</div><div class="metric-val">${fmtK(aL)}</div><div class="metric-unit">metres</div></div><div class="metric-card danger"><div class="metric-lbl">Avg high sprint</div><div class="metric-val">${fmtK(aS)}</div><div class="metric-unit">metres</div></div><div class="metric-card" style="--accent:${aR?rpeColor(aR):"var(--muted)"}"><div class="metric-lbl">Squad avg RPE</div><div class="metric-val" style="color:${aR?rpeColor(aR):"var(--muted)"}">${aR?aR.toFixed(1):"--"}</div><div class="metric-unit">${aR?rpeLabel(aR):"not recorded"}</div></div>`;const sorted=[...p].sort((a,b)=>b.total-a.total);const labels=sorted.map(x=>x.name.split(" ").slice(-1)[0]);destroyChart("teamDistChart");const ds=[{label:"Total",data:sorted.map(x=>x.total),backgroundColor:"rgba(0,224,122,0.7)",borderRadius:3}];if(has("hmld"))ds.push({label:"HMLD",data:sorted.map(x=>x.hmld||0),backgroundColor:"rgba(0,136,255,0.7)",borderRadius:3});if(has("lsprint"))ds.push({label:"Low sprint",data:sorted.map(x=>x.lsprint||0),backgroundColor:"rgba(255,159,28,0.7)",borderRadius:3});if(has("hsprint"))ds.push({label:"High sprint",data:sorted.map(x=>x.hsprint||0),backgroundColor:"rgba(255,77,77,0.7)",borderRadius:3});charts["teamDistChart"]=new Chart(document.getElementById("teamDistChart"),{type:"bar",data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:GC.color,font:{size:10},autoSkip:false,maxRotation:40},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:10}},grid:{color:GC.grid}}}}});const sc=document.getElementById("sprint-card");if(has("lsprint")||has("hsprint")){sc.style.display="";document.getElementById("sprint-chart-wrap").style.height=Math.max(200,p.length*28+60)+"px";const spDS=[];if(has("lsprint"))spDS.push({label:"Low sprint",data:sorted.map(x=>x.lsprint||0),backgroundColor:"rgba(255,159,28,0.75)",borderRadius:3});if(has("hsprint"))spDS.push({label:"High sprint",data:sorted.map(x=>x.hsprint||0),backgroundColor:"rgba(255,77,77,0.75)",borderRadius:3});destroyChart("sprintChart");charts["sprintChart"]=new Chart(document.getElementById("sprintChart"),{type:"bar",indexAxis:"y",data:{labels,datasets:spDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{sc.style.display="none";}if(has("rpe")){document.getElementById("rpe-chart-wrap").style.display="";document.getElementById("rpe-manual").style.display="none";document.getElementById("rpe-chart-inner").style.height=Math.max(180,p.length*26+60)+"px";const rs=[...p].filter(x=>x.rpe!==null).sort((a,b)=>a.rpe-b.rpe);destroyChart("rpeChart");charts["rpeChart"]=new Chart(document.getElementById("rpeChart"),{type:"bar",indexAxis:"y",data:{labels:rs.map(x=>x.name.split(" ").slice(-1)[0]),datasets:[{data:rs.map(x=>x.rpe),backgroundColor:rs.map(x=>rpeColor(x.rpe)),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:10,ticks:{stepSize:1,color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{document.getElementById("rpe-chart-wrap").style.display="none";document.getElementById("rpe-manual").style.display="";const grid=document.getElementById("rpe-grid");grid.innerHTML="";p.forEach((pl,i)=>{const row=document.createElement("div");row.className="rpe-player-row";row.innerHTML=`<div class="rpe-player-name">${pl.name}</div><div class="rpe-btns">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="rpe-btn" id="rpe_${i}_${n}" onclick="setRPE(${i},${n})">${n}</button>`).join("")}</div>`;grid.appendChild(row);});}}
+function setRPE(idx,val){currentSession.players[idx].rpe=val;for(let n=1;n<=10;n++){const b=document.getElementById(`rpe_${idx}_${n}`);if(b)b.classList.toggle("active",n<=val);}}
+function renderPlayerTable(){const p=[...currentSession.players];p.sort((a,b)=>{const av=a[sortCol],bv=b[sortCol];if(av===null&&bv===null)return 0;if(av===null)return 1;if(bv===null)return -1;if(typeof av==="string")return sortDir*av.localeCompare(bv);return sortDir*(bv-av);});const maxT=Math.max(...p.map(x=>x.total));document.getElementById("player-tbody").innerHTML=p.map(pl=>{const lr=loadRating(pl,currentSession.players);const pc=lr==="high"?"pill-high":lr==="low"?"pill-low":"pill-normal";const rc=pl.rpe?`background:${rpeColor(pl.rpe)}22;color:${rpeColor(pl.rpe)}`:"color:var(--muted)";return`<tr class="clickable" onclick="showPlayerDetail('${pl.name.replace(/'/g,"\'")}')"><td style="font-weight:500">${pl.name}</td><td><div class="bar-wrap"><span>${fmtK(pl.total)}</span><div class="bar-bg"><div class="bar-fill" style="width:${Math.round(pl.total/maxT*100)}%"></div></div></div></td><td>${fmtK(pl.hmld)}</td><td>${fmtK(pl.lsprint)}</td><td>${fmtK(pl.hsprint)}</td><td>${fmt(pl.maxspeed,1)}</td><td><span class="rpe-num" style="${rc}">${pl.rpe!==null?pl.rpe:"--"}</span></td><td><span class="load-pill ${pc}">${lr.charAt(0).toUpperCase()+lr.slice(1)}</span></td></tr>`;}).join("");}
+function sortBy(col){if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=-1;}renderPlayerTable();}
+function showPlayerDetail(name){const player=currentSession.players.find(p=>p.name===name);if(!player)return;document.getElementById("player-table").style.display="none";document.getElementById("player-detail").style.display="block";const initials=name.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);const p=currentSession.players;const lr=loadRating(player,p);const pc=lr==="high"?"pill-high":lr==="low"?"pill-low":"pill-normal";document.getElementById("player-header").innerHTML=`<div class="player-avatar">${initials}</div><div><div class="player-info-name">${player.name}</div><div class="player-info-sub">${currentSession.name} <span class="load-pill ${pc}">${lr.charAt(0).toUpperCase()+lr.slice(1)} load</span></div></div>${player.rpe!==null?`<div class="player-rpe-badge"><div class="player-rpe-val" style="color:${rpeColor(player.rpe)}">${player.rpe}</div><div class="player-rpe-lbl">RPE - ${rpeLabel(player.rpe)}</div></div>`:""}`;document.getElementById("detail-stats").innerHTML=[{v:fmtK(player.total),l:"Total distance",u:"m"},{v:fmtK(player.hmld),l:"HMLD",u:"m"},{v:fmtK(player.lsprint),l:"Low sprint",u:"m"},{v:fmtK(player.hsprint),l:"High sprint",u:"m"},{v:fmt(player.maxspeed,1),l:"Max speed",u:"km/h"}].map(s=>`<div class="detail-stat"><div class="detail-stat-val">${s.v}</div><div class="detail-stat-lbl">${s.l}<br><span style="color:var(--muted)">${s.u}</span></div></div>`).join("");destroyChart("playerVsChart");destroyChart("rpeDistChart");const ml=["Total dist"],pv=[player.total],av=[avg(p,"total")];if(has("hmld")){ml.push("HMLD");pv.push(player.hmld);av.push(avg(p,"hmld"));}if(has("lsprint")){ml.push("Low sprint");pv.push(player.lsprint);av.push(avg(p,"lsprint"));}if(has("hsprint")){ml.push("High sprint");pv.push(player.hsprint);av.push(avg(p,"hsprint"));}setTimeout(()=>{charts["playerVsChart"]=new Chart(document.getElementById("playerVsChart"),{type:"bar",data:{labels:ml,datasets:[{label:player.name.split(" ")[0],data:pv,backgroundColor:"rgba(0,224,122,0.7)",borderRadius:4},{label:"Squad avg",data:av,backgroundColor:"rgba(255,255,255,0.1)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:GC.color,font:{size:11}}}},scales:{x:{ticks:{color:GC.color,font:{size:11}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:11}},grid:{color:GC.grid}}}}});const rc=document.getElementById("rpe-dist-card");if(has("rpe")&&player.rpe!==null){rc.style.display="";const rs=[...p].filter(x=>x.rpe!==null).sort((a,b)=>a.rpe-b.rpe);charts["rpeDistChart"]=new Chart(document.getElementById("rpeDistChart"),{type:"bar",indexAxis:"y",data:{labels:rs.map(x=>x.name.split(" ").slice(-1)[0]),datasets:[{data:rs.map(x=>x.rpe),backgroundColor:rs.map(x=>x.name===player.name?rpeColor(x.rpe):"rgba(255,255,255,0.1)"),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:10,ticks:{stepSize:1,color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{rc.style.display="none";}},50);}
+function closeDetail(){document.getElementById("player-table").style.display="";document.getElementById("player-detail").style.display="none";destroyChart("playerVsChart");destroyChart("rpeDistChart");}
+function renderCompare(){if(sessions.length<2){document.getElementById("compare-upload").style.display="";return;}document.getElementById("compare-upload").style.display="none";renderCompareCharts();}
+function handleCmpFile(file){const r=new FileReader();r.onload=e=>{const{headers,rows}=parseCSV(e.target.result);const mapped={};for(const f of Object.keys(FIELDS)){const found=detectCol(headers,f);if(found)mapped[f]=found;}if(!mapped.name||!mapped.total){alert("Could not auto-detect columns.");return;}const players=rows.map(r=>({name:r[mapped.name]?.trim()||"Unknown",total:parseNum(r[mapped.total]),hmld:mapped.hmld?parseNum(r[mapped.hmld]):null,lsprint:mapped.lsprint?parseNum(r[mapped.lsprint]):null,hsprint:mapped.hsprint?parseNum(r[mapped.hsprint]):null,rpe:mapped.rpe?parseNum(r[mapped.rpe]):null})).filter(p=>p.total>0);sessions.push({name:file.name.replace(/\.(csv|txt)$/i,""),players,synced:false});renderCompareCharts();};r.readAsText(file);}
+function renderCompareCharts(){const s1=sessions[sessions.length-2],s2=sessions[sessions.length-1];const allNames=[...new Set([...s1.players.map(p=>p.name),...s2.players.map(p=>p.name)])];const labels=allNames.map(n=>n.split(" ").slice(-1)[0]);const get=(sess,name,key)=>{const p=sess.players.find(x=>x.name===name);return(p&&p[key]!==null)?p[key]:0;};const h=Math.max(200,allNames.length*32+80);["cmpTotal","cmpHMLD","cmpSprint","cmpRPE"].forEach(id=>destroyChart(id));document.getElementById("compare-charts").innerHTML=`<div class="chart-row cols-1"><div class="chart-card"><div class="chart-head"><div class="chart-title">Total distance</div><div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#00e07a"></div>${s1.name}</div><div class="leg-item"><div class="leg-dot" style="background:#0088ff"></div>${s2.name}</div></div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpTotal"></canvas></div></div></div><div class="chart-row cols-2"><div class="chart-card"><div class="chart-head"><div class="chart-title">HMLD</div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpHMLD"></canvas></div></div><div class="chart-card"><div class="chart-head"><div class="chart-title">Sprint zones</div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpSprint"></canvas></div></div></div><div class="chart-row cols-1" id="cmp-rpe-row"><div class="chart-card"><div class="chart-head"><div class="chart-title">RPE comparison</div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpRPE"></canvas></div></div></div>`;const bo={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}};setTimeout(()=>{charts["cmpTotal"]=new Chart(document.getElementById("cmpTotal"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:s1.name,data:allNames.map(n=>get(s1,n,"total")),backgroundColor:"rgba(0,224,122,0.7)",borderRadius:3},{label:s2.name,data:allNames.map(n=>get(s2,n,"total")),backgroundColor:"rgba(0,136,255,0.7)",borderRadius:3}]},options:bo});charts["cmpHMLD"]=new Chart(document.getElementById("cmpHMLD"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:s1.name,data:allNames.map(n=>get(s1,n,"hmld")),backgroundColor:"rgba(0,224,122,0.7)",borderRadius:3},{label:s2.name,data:allNames.map(n=>get(s2,n,"hmld")),backgroundColor:"rgba(0,136,255,0.7)",borderRadius:3}]},options:bo});charts["cmpSprint"]=new Chart(document.getElementById("cmpSprint"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:"Low S1",data:allNames.map(n=>get(s1,n,"lsprint")),backgroundColor:"rgba(255,159,28,0.75)",borderRadius:3},{label:"High S1",data:allNames.map(n=>get(s1,n,"hsprint")),backgroundColor:"rgba(255,77,77,0.75)",borderRadius:3},{label:"Low S2",data:allNames.map(n=>get(s2,n,"lsprint")),backgroundColor:"rgba(255,206,112,0.6)",borderRadius:3},{label:"High S2",data:allNames.map(n=>get(s2,n,"hsprint")),backgroundColor:"rgba(255,144,144,0.6)",borderRadius:3}]},options:bo});const hasRPE=s1.players.some(p=>p.rpe!==null)||s2.players.some(p=>p.rpe!==null);if(hasRPE){charts["cmpRPE"]=new Chart(document.getElementById("cmpRPE"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:s1.name,data:allNames.map(n=>get(s1,n,"rpe")),backgroundColor:"rgba(0,224,122,0.7)",borderRadius:3},{label:s2.name,data:allNames.map(n=>get(s2,n,"rpe")),backgroundColor:"rgba(0,136,255,0.7)",borderRadius:3}]},options:{...bo,scales:{x:{min:0,max:10,ticks:{stepSize:1,color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{document.getElementById("cmp-rpe-row").style.display="none";}},50);}
+
+function saveKey(){
+  const v=document.getElementById("key-input").value.trim();
+  if(v.startsWith("ntn_")||v.startsWith("secret_")){
+    localStorage.setItem("notion_key",v);
+    document.getElementById("key-banner").style.display="none";
+  } else {
+    alert("Key should start with ntn_ or secret_");
   }
-  res.push(cur);
-  return res;
 }
-function detectCol(headers, field) {
-  const aliases = FIELDS[field].aliases;
-  for (const h of headers) {
-    const low = h.toLowerCase().trim();
-    if (aliases.some(a => low === a || low.includes(a))) return h;
+function checkKeyBanner(){
+  // Show auto-sync hint on upload screen if key is already saved
+  const hint=document.getElementById("auto-sync-hint");
+  if(hint&&localStorage.getItem("notion_key")){hint.style.display="block";}
+
+  if(!localStorage.getItem("notion_key")){
+    document.getElementById("key-banner").style.display="flex";
   }
-  return null;
 }
 
-// ─── FILE HANDLING ────────────────────────────────────────────────────────────
-function initDropzone() {
-  const dz = document.getElementById('dropzone');
-  const inp = document.getElementById('file-input');
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
-  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
-  inp.addEventListener('change', () => { if (inp.files[0]) handleFile(inp.files[0]); inp.value = ''; });
-  document.getElementById('cmp-input').addEventListener('change', function() { if (this.files[0]) handleCmpFile(this.files[0]); this.value = ''; });
-}
-function handleFile(file) {
-  const reader = new FileReader();
-  reader.onload = e => processCSV(e.target.result, file.name);
-  reader.readAsText(file);
-}
-function processCSV(text, filename) {
-  const { headers, rows } = parseCSV(text);
-  const mapped = {};
-  let needsMapping = false;
-  for (const field of Object.keys(FIELDS)) {
-    const found = detectCol(headers, field);
-    if (found) mapped[field] = found;
-    else if (FIELDS[field].req) needsMapping = true;
+// ─── SEASON TRENDS ────────────────────────────────────────────────────────────
+let trendsData = []; // [{session, date, players:[{name,total,hmld,lsprint,hsprint,rpe}]}]
+
+async function loadTrendsFromNotion() {
+  const btn = document.getElementById("trends-load-btn");
+  const status = document.getElementById("trends-status");
+  const key = localStorage.getItem("notion_key") || "";
+  if (!key) {
+    status.style.display = "block";
+    status.textContent = "Notion key not set — upload a CSV first and save your key via the Sync button.";
+    return;
   }
-  if (needsMapping) showMapper(headers, mapped, rows, filename);
-  else buildSession(rows, mapped, filename);
-}
-function showError(msg) {
-  const el = document.getElementById('error-banner');
-  el.textContent = msg; el.style.display = 'block';
-}
-function showMapper(headers, autoMapped, rows, filename) {
-  const grid = document.getElementById('mapper-grid');
-  grid.innerHTML = '';
-  for (const [field, meta] of Object.entries(FIELDS)) {
-    const sel = autoMapped[field] || '';
-    const div = document.createElement('div');
-    div.className = 'mapper-row';
-    div.innerHTML = `<div class="mapper-label">${meta.label}${meta.req ? '<span class="req">*</span>' : ''}</div>
-      <select class="mapper-select" id="map_${field}">
-        <option value="">— skip —</option>
-        ${headers.map(h => `<option value="${h}"${h===sel?' selected':''}>${h}</option>`).join('')}
-      </select>`;
-    grid.appendChild(div);
+  btn.textContent = "Loading..."; btn.disabled = true;
+  status.style.display = "block"; status.textContent = "Fetching data from Notion...";
+
+  try {
+    const url = PROXY + encodeURIComponent("https://api.notion.com/v1/databases/" + LOADS_DB + "/query");
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + key, "Notion-Version": NV, "Content-Type": "application/json" },
+      body: JSON.stringify({ page_size: 200, sorts: [{ property: "Entry", direction: "ascending" }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Notion error");
+
+    const rawEntries = data.results.map(page => {
+      const p = page.properties;
+      const entry = p["Entry"]?.title?.[0]?.plain_text || "";
+      // Parse "PlayerName - SessionName" format
+      const parts = entry.split(" - ");
+      const playerName = parts[0]?.trim() || "";
+      const sessionName = parts.slice(1).join(" - ").trim() || "";
+      return {
+        player: playerName,
+        session: sessionName,
+        total:    p["Total Distance (m)"]?.number ?? null,
+        hmld:     p["HMLD (m)"]?.number ?? null,
+        lsprint:  p["Low Sprint (m)"]?.number ?? null,
+        hsprint:  p["High Sprint (m)"]?.number ?? null,
+        rpe:      p["RPE"]?.number ?? null,
+      };
+    }).filter(e => e.player && e.session);
+
+    // Group by session
+    const sessionMap = {};
+    rawEntries.forEach(e => {
+      if (!sessionMap[e.session]) sessionMap[e.session] = { session: e.session, players: [] };
+      sessionMap[e.session].players.push(e);
+    });
+
+    trendsData = Object.values(sessionMap).sort((a, b) => a.session.localeCompare(b.session));
+
+    // Populate player dropdown
+    const allPlayers = [...new Set(rawEntries.map(e => e.player))].sort();
+    const sel = document.getElementById("trends-player");
+    sel.innerHTML = '<option value="all">All players + team avg</option>';
+    allPlayers.forEach(name => {
+      const opt = document.createElement("option");
+      opt.value = name; opt.textContent = name;
+      sel.appendChild(opt);
+    });
+
+    status.textContent = `Loaded ${trendsData.length} sessions, ${rawEntries.length} player entries.`;
+    btn.textContent = "Refresh"; btn.disabled = false;
+    renderTrends();
+  } catch(e) {
+    status.textContent = "Error: " + e.message;
+    btn.textContent = "Retry"; btn.disabled = false;
   }
-  document.getElementById('col-mapper').style.display = 'block';
-  window._pendingRows = rows;
-  window._pendingFilename = filename;
 }
-function confirmMapping() {
-  const mapped = {};
-  for (const f of Object.keys(FIELDS)) {
-    const el = document.getElementById('map_'+f);
-    if (el && el.value) mapped[f] = el.value;
+
+function renderTrends() {
+  if (!trendsData.length) {
+    document.getElementById("trends-status").style.display = "block";
+    document.getElementById("trends-status").textContent = "Click Load from Notion to fetch your season data.";
+    return;
   }
-  if (!mapped.name || !mapped.total) { showError('Please map at least Player name and Total distance.'); return; }
-  document.getElementById('col-mapper').style.display = 'none';
-  buildSession(window._pendingRows, mapped, window._pendingFilename);
-}
-function buildSession(rows, colMap, filename) {
-  const players = rows.map(r => ({
-    name:     r[colMap.name]?.trim() || 'Unknown',
-    total:    parseNum(r[colMap.total]),
-    hmld:     colMap.hmld     ? parseNum(r[colMap.hmld])     : null,
-    lsprint:  colMap.lsprint  ? parseNum(r[colMap.lsprint])  : null,
-    hsprint:  colMap.hsprint  ? parseNum(r[colMap.hsprint])  : null,
-    maxspeed: colMap.maxspeed ? parseNum(r[colMap.maxspeed]) : null,
-    rpe:      colMap.rpe      ? parseNum(r[colMap.rpe])      : null,
-  })).filter(p => p.name !== 'Unknown' && p.total > 0);
+  const metric = document.getElementById("trends-metric").value;
+  const playerFilter = document.getElementById("trends-player").value;
+  const metricLabels = { total: "Total Distance (m)", hmld: "HMLD (m)", lsprint: "Low Sprint (m)", hsprint: "High Sprint (m)", rpe: "RPE" };
+  const metricLabel = metricLabels[metric];
 
-  if (!players.length) { showError('No valid player rows found. Check your CSV.'); return; }
-  const session = { name: filename.replace(/\.csv$/i,'').replace(/\.txt$/i,''), players };
-  sessions.push(session);
-  currentSession = session;
-  document.getElementById('upload-screen').style.display = 'none';
-  document.getElementById('dashboard').style.display = 'block';
-  document.getElementById('session-pill').textContent = session.name;
-  showTab('team');
-}
-function parseNum(v) {
-  if (!v && v !== 0) return null;
-  const n = parseFloat(String(v).replace(/,/g,''));
-  return isNaN(n) ? null : n;
-}
-function newSession() {
-  document.getElementById('upload-screen').style.display = 'flex';
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('error-banner').style.display = 'none';
-  document.getElementById('col-mapper').style.display = 'none';
-  destroyAllCharts();
-}
+  document.getElementById("trends-chart-title").textContent = metricLabel + " — season trend";
 
-// ─── TABS ─────────────────────────────────────────────────────────────────────
-function showTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['team','players','compare'][i]===tab));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-'+tab).classList.add('active');
-  document.getElementById('player-table').style.display = '';
-  document.getElementById('player-detail').style.display = 'none';
-  if (tab === 'team') renderTeam();
-  if (tab === 'players') renderPlayerTable();
-  if (tab === 'compare') renderCompare();
-}
-
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-function avg(arr, key) {
-  const vals = arr.map(p => p[key]).filter(v => v !== null && !isNaN(v));
-  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
-}
-function has(key) { return currentSession.players.some(p => p[key] !== null && p[key] > 0); }
-function fmt(v, dec=0) { return v !== null && !isNaN(v) ? v.toFixed(dec) : '—'; }
-function fmtK(v) { return v !== null && !isNaN(v) ? Math.round(v).toLocaleString() : '—'; }
-function rpeColor(v) { return v <= 3 ? '#00e07a' : v <= 6 ? '#ff9f1c' : '#ff4d4d'; }
-function rpeLabel(v) { if (!v) return ''; return v <= 3 ? 'Easy' : v <= 5 ? 'Moderate' : v <= 7 ? 'Hard' : 'Very hard'; }
-function loadRating(player, players) {
-  const a = avg(players, 'total');
-  if (!a) return 'normal';
-  const r = player.total / a;
-  return r >= 1.1 ? 'high' : r >= 0.85 ? 'normal' : 'low';
-}
-function destroyAllCharts() {
-  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
-  charts = {};
-}
-function destroyChart(id) {
-  if (charts[id]) { try { charts[id].destroy(); } catch(e){} delete charts[id]; }
-}
-
-const CHART_DEFAULTS = {
-  color: '#e8eaed',
-  borderColor: 'rgba(255,255,255,0.06)',
-  gridColor: 'rgba(255,255,255,0.05)',
-};
-
-// ─── TEAM TAB ─────────────────────────────────────────────────────────────────
-function renderTeam() {
-  const p = currentSession.players;
-  const aTotal = avg(p,'total'), aHMLD = avg(p,'hmld'), aLS = avg(p,'lsprint'), aHS = avg(p,'hsprint'), aRPE = avg(p,'rpe');
-
-  // Metric cards
-  const mc = document.getElementById('team-metrics');
-  mc.innerHTML = `
-    <div class="metric-card">
-      <div class="metric-lbl">Avg total distance</div>
-      <div class="metric-val">${aTotal ? Math.round(aTotal/100)/10+'k' : '—'}</div>
-      <div class="metric-unit">metres</div>
-    </div>
-    <div class="metric-card info">
-      <div class="metric-lbl">Avg HMLD</div>
-      <div class="metric-val">${fmtK(aHMLD)}</div>
-      <div class="metric-unit">metres</div>
-    </div>
-    <div class="metric-card warn">
-      <div class="metric-lbl">Avg low sprint</div>
-      <div class="metric-val">${fmtK(aLS)}</div>
-      <div class="metric-unit">metres</div>
-    </div>
-    <div class="metric-card" style="--accent:var(--danger)">
-      <div class="metric-lbl">Avg high sprint</div>
-      <div class="metric-val">${fmtK(aHS)}</div>
-      <div class="metric-unit">metres</div>
-    </div>
-    <div class="metric-card rpe">
-      <div class="metric-lbl">Squad avg RPE</div>
-      <div class="metric-val" style="color:${aRPE ? rpeColor(aRPE) : 'var(--muted)'}">${aRPE ? aRPE.toFixed(1) : '—'}</div>
-      <div class="metric-unit">${aRPE ? rpeLabel(aRPE) : 'not recorded'}</div>
-    </div>`;
-
-  // Distance chart
-  const sorted = [...p].sort((a,b) => b.total - a.total);
-  const labels = sorted.map(x => x.name.split(' ').slice(-1)[0]);
-  destroyChart('teamDistChart');
-  const distDS = [{ label:'Total', data:sorted.map(x=>x.total), backgroundColor:'rgba(0,224,122,0.7)', borderRadius:3 }];
-  if (has('hmld'))    distDS.push({ label:'HMLD',       data:sorted.map(x=>x.hmld||0),    backgroundColor:'rgba(0,136,255,0.7)', borderRadius:3 });
-  if (has('lsprint')) distDS.push({ label:'Low sprint', data:sorted.map(x=>x.lsprint||0), backgroundColor:'rgba(255,159,28,0.7)', borderRadius:3 });
-  if (has('hsprint')) distDS.push({ label:'High sprint',data:sorted.map(x=>x.hsprint||0), backgroundColor:'rgba(255,77,77,0.7)', borderRadius:3 });
-
-  charts['teamDistChart'] = new Chart(document.getElementById('teamDistChart'), {
-    type:'bar', data:{ labels, datasets:distDS },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
-      scales:{ x:{ ticks:{ color:CHART_DEFAULTS.color, font:{size:10}, autoSkip:false, maxRotation:40 }, grid:{color:CHART_DEFAULTS.gridColor} },
-               y:{ ticks:{ color:CHART_DEFAULTS.color, font:{size:10} }, grid:{color:CHART_DEFAULTS.gridColor} } } }
+  const sessionLabels = trendsData.map(s => {
+    // Shorten session name for axis
+    const n = s.session;
+    const match = n.match(/(\d+)\s*(Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|Jan|Feb)/i);
+    return match ? match[1] + " " + match[2] : n.split(" ").slice(-2).join(" ");
   });
 
-  // Sprint zones chart
-  const sc = document.getElementById('sprint-card');
-  if (has('lsprint') || has('hsprint')) {
-    sc.style.display = '';
-    document.getElementById('sprint-chart-wrap').style.height = Math.max(200, p.length*28+60)+'px';
-    const spDS = [];
-    if (has('lsprint')) spDS.push({ label:'Low sprint', data:sorted.map(x=>x.lsprint||0), backgroundColor:'rgba(255,159,28,0.75)', borderRadius:3 });
-    if (has('hsprint')) spDS.push({ label:'High sprint',data:sorted.map(x=>x.hsprint||0), backgroundColor:'rgba(255,77,77,0.75)', borderRadius:3 });
-    destroyChart('sprintChart');
-    charts['sprintChart'] = new Chart(document.getElementById('sprintChart'), {
-      type:'bar', indexAxis:'y', data:{ labels, datasets:spDS },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
-        scales:{ x:{ ticks:{color:CHART_DEFAULTS.color, font:{size:10}}, grid:{color:CHART_DEFAULTS.gridColor} },
-                 y:{ ticks:{color:CHART_DEFAULTS.color, font:{size:9}}, grid:{color:CHART_DEFAULTS.gridColor} } } }
-    });
-  } else { sc.style.display = 'none'; }
+  // Team average per session
+  const teamAvg = trendsData.map(s => {
+    const vals = s.players.map(p => p[metric]).filter(v => v !== null && !isNaN(v));
+    return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length * 10) / 10 : null;
+  });
 
-  // RPE
-  const rpeHas = has('rpe');
-  if (rpeHas) {
-    document.getElementById('rpe-chart-wrap').style.display = '';
-    document.getElementById('rpe-manual').style.display = 'none';
-    document.getElementById('rpe-chart-inner').style.height = Math.max(180, p.length*26+60)+'px';
-    const rpeSorted = [...p].filter(x=>x.rpe!==null).sort((a,b)=>a.rpe-b.rpe);
-    destroyChart('rpeChart');
-    charts['rpeChart'] = new Chart(document.getElementById('rpeChart'), {
-      type:'bar', indexAxis:'y',
-      data:{ labels:rpeSorted.map(x=>x.name.split(' ').slice(-1)[0]), datasets:[{ data:rpeSorted.map(x=>x.rpe), backgroundColor:rpeSorted.map(x=>rpeColor(x.rpe)), borderRadius:3 }]},
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-        scales:{ x:{min:0,max:10, ticks:{stepSize:1,color:CHART_DEFAULTS.color,font:{size:10}}, grid:{color:CHART_DEFAULTS.gridColor}},
-                 y:{ ticks:{color:CHART_DEFAULTS.color,font:{size:9}}, grid:{color:CHART_DEFAULTS.gridColor} } } }
+  // Peak per session
+  const teamPeak = trendsData.map(s => {
+    const vals = s.players.map(p => p[metric]).filter(v => v !== null && !isNaN(v));
+    return vals.length ? Math.max(...vals) : null;
+  });
+
+  const GC = { color: "#e8eaed", grid: "rgba(255,255,255,0.05)" };
+  const baseLineOpts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: GC.color, font: { size: 10 }, maxRotation: 40 }, grid: { color: GC.grid } },
+      y: { ticks: { color: GC.color, font: { size: 10 } }, grid: { color: GC.grid } }
+    }
+  };
+
+  // MAIN LINE CHART
+  destroyChart("trendsLineChart");
+  const lineDatasets = [];
+
+  if (playerFilter === "all") {
+    // All players as thin faint lines + bold team avg
+    const allPlayers = [...new Set(trendsData.flatMap(s => s.players.map(p => p.player)))].sort();
+    const playerColors = ["#00e07a","#0088ff","#ff9f1c","#ff4d4d","#534AB7","#D85A30","#1D9E75","#BA7517","#E24B4a","#5DCAA5","#7F77DD","#F0997B","#378ADD","#97C459","#D4537E","#EF9F27","#3B8BD4","#639922","#993556","#85B7EB","#C0DD97","#FAC775","#B5D4F4"];
+    allPlayers.forEach((name, i) => {
+      const data = trendsData.map(s => {
+        const p = s.players.find(x => x.player === name);
+        return p ? p[metric] : null;
+      });
+      lineDatasets.push({
+        label: name,
+        data,
+        borderColor: playerColors[i % playerColors.length],
+        backgroundColor: "transparent",
+        borderWidth: 1.5,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        tension: 0.3,
+        spanGaps: true,
+      });
+    });
+    // Team average — bold on top
+    lineDatasets.push({
+      label: "Team avg",
+      data: teamAvg,
+      borderColor: "#ffffff",
+      backgroundColor: "rgba(255,255,255,0.05)",
+      borderWidth: 3,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      tension: 0.3,
+      spanGaps: true,
+      fill: true,
     });
   } else {
-    document.getElementById('rpe-chart-wrap').style.display = 'none';
-    document.getElementById('rpe-manual').style.display = '';
-    const grid = document.getElementById('rpe-grid');
-    grid.innerHTML = '';
-    p.forEach((pl, i) => {
-      const row = document.createElement('div');
-      row.className = 'rpe-player-row';
-      row.innerHTML = `<div class="rpe-player-name">${pl.name}</div><div class="rpe-btns">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="rpe-btn" id="rpe_${i}_${n}" onclick="setRPE(${i},${n})">${n}</button>`).join('')}</div>`;
-      grid.appendChild(row);
+    // Single player vs team avg
+    const playerData = trendsData.map(s => {
+      const p = s.players.find(x => x.player === playerFilter);
+      return p ? p[metric] : null;
+    });
+    lineDatasets.push({
+      label: playerFilter,
+      data: playerData,
+      borderColor: "#00e07a",
+      backgroundColor: "rgba(0,224,122,0.08)",
+      borderWidth: 2.5,
+      pointRadius: 4,
+      tension: 0.3,
+      spanGaps: true,
+      fill: true,
+    });
+    lineDatasets.push({
+      label: "Team avg",
+      data: teamAvg,
+      borderColor: "rgba(255,255,255,0.4)",
+      backgroundColor: "transparent",
+      borderWidth: 1.5,
+      borderDash: [5, 4],
+      pointRadius: 2,
+      tension: 0.3,
+      spanGaps: true,
     });
   }
-}
 
-function setRPE(idx, val) {
-  currentSession.players[idx].rpe = val;
-  for (let n = 1; n <= 10; n++) {
-    const btn = document.getElementById(`rpe_${idx}_${n}`);
-    if (btn) btn.classList.toggle('active', n <= val);
-  }
-}
-
-// ─── PLAYER TABLE ─────────────────────────────────────────────────────────────
-function renderPlayerTable() {
-  const p = [...currentSession.players];
-  p.sort((a, b) => {
-    const av = a[sortCol], bv = b[sortCol];
-    if (av === null && bv === null) return 0;
-    if (av === null) return 1; if (bv === null) return -1;
-    if (typeof av === 'string') return sortDir * av.localeCompare(bv);
-    return sortDir * (bv - av);
+  charts["trendsLineChart"] = new Chart(document.getElementById("trendsLineChart"), {
+    type: "line",
+    data: { labels: sessionLabels, datasets: lineDatasets },
+    options: {
+      ...baseLineOpts,
+      plugins: {
+        legend: { display: playerFilter !== "all", labels: { color: GC.color, font: { size: 11 }, boxWidth: 12 } },
+        tooltip: {
+          callbacks: {
+            title: (items) => trendsData[items[0].dataIndex]?.session || "",
+          }
+        }
+      }
+    }
   });
-  const maxT = Math.max(...p.map(x => x.total));
-  const tbody = document.getElementById('player-tbody');
-  tbody.innerHTML = p.map(pl => {
-    const lr = loadRating(pl, currentSession.players);
-    const pillCls = lr === 'high' ? 'pill-high' : lr === 'low' ? 'pill-low' : 'pill-normal';
-    const pillTxt = lr.charAt(0).toUpperCase() + lr.slice(1);
-    const rpeVal = pl.rpe;
-    const rpeBg = rpeVal ? `background:${rpeColor(rpeVal)}22;color:${rpeColor(rpeVal)}` : 'color:var(--muted)';
-    return `<tr class="clickable" onclick="showPlayerDetail('${pl.name.replace(/'/g,"\\'")}')">
-      <td class="player-name-cell">${pl.name}</td>
-      <td><div class="bar-wrap"><span>${fmtK(pl.total)}</span><div class="bar-bg"><div class="bar-fill" style="width:${Math.round(pl.total/maxT*100)}%"></div></div></div></td>
-      <td>${fmtK(pl.hmld)}</td>
-      <td>${fmtK(pl.lsprint)}</td>
-      <td>${fmtK(pl.hsprint)}</td>
-      <td>${fmt(pl.maxspeed, 1)}</td>
-      <td><span class="rpe-num" style="${rpeBg}">${rpeVal !== null ? rpeVal : '—'}</span></td>
-      <td><span class="load-pill ${pillCls}">${pillTxt}</span></td>
+
+  // Build legend for all-players mode
+  const legendEl = document.getElementById("trends-legend");
+  if (playerFilter === "all") {
+    const allPlayers2 = [...new Set(trendsData.flatMap(s => s.players.map(p => p.player)))].sort();
+    const playerColors2 = ["#00e07a","#0088ff","#ff9f1c","#ff4d4d","#534AB7","#D85A30","#1D9E75","#BA7517","#E24B4a","#5DCAA5","#7F77DD","#F0997B","#378ADD","#97C459","#D4537E","#EF9F27","#3B8BD4","#639922","#993556","#85B7EB","#C0DD97","#FAC775","#B5D4F4"];
+    legendEl.innerHTML = allPlayers2.map((n,i) =>
+      `<div class="leg-item"><div class="leg-dot" style="background:${playerColors2[i%playerColors2.length]}"></div>${n.split(" ").slice(-1)[0]}</div>`
+    ).join("") + '<div class="leg-item"><div class="leg-dot" style="background:#fff"></div>Team avg</div>';
+  } else {
+    legendEl.innerHTML = `<div class="leg-item"><div class="leg-dot" style="background:#00e07a"></div>${playerFilter}</div><div class="leg-item"><div class="leg-dot" style="background:rgba(255,255,255,0.4)"></div>Team avg</div>`;
+  }
+
+  // AVG CHART
+  destroyChart("trendsAvgChart");
+  charts["trendsAvgChart"] = new Chart(document.getElementById("trendsAvgChart"), {
+    type: "line",
+    data: { labels: sessionLabels, datasets: [{
+      data: teamAvg,
+      borderColor: "#0088ff",
+      backgroundColor: "rgba(0,136,255,0.08)",
+      borderWidth: 2,
+      pointRadius: 4,
+      tension: 0.3,
+      fill: true,
+      spanGaps: true,
+    }]},
+    options: { ...baseLineOpts, plugins: { legend: { display: false } } }
+  });
+
+  // PEAK CHART
+  destroyChart("trendsPeakChart");
+  charts["trendsPeakChart"] = new Chart(document.getElementById("trendsPeakChart"), {
+    type: "bar",
+    data: { labels: sessionLabels, datasets: [{
+      data: teamPeak,
+      backgroundColor: "rgba(255,159,28,0.7)",
+      borderRadius: 4,
+    }]},
+    options: { ...baseLineOpts, plugins: { legend: { display: false } } }
+  });
+
+  // SUMMARY TABLE
+  document.getElementById("th-avg").textContent = "Season avg";
+  document.getElementById("th-peak").textContent = "Season peak";
+  document.getElementById("th-trend").textContent = "Trend";
+
+  const allPlayerNames = [...new Set(trendsData.flatMap(s => s.players.map(p => p.player)))].sort();
+  const tbody = document.getElementById("trends-tbody");
+  tbody.innerHTML = allPlayerNames.map(name => {
+    const vals = trendsData.map(s => {
+      const p = s.players.find(x => x.player === name);
+      return p ? p[metric] : null;
+    }).filter(v => v !== null);
+
+    if (!vals.length) return "";
+    const sessionCount = vals.length;
+    const seasonAvg = Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+    const seasonPeak = Math.max(...vals);
+
+    // Trend: compare last 2 sessions vs first 2
+    let trendIcon = '<span class="trend-flat">—</span>';
+    if (vals.length >= 4) {
+      const early = (vals[0] + vals[1]) / 2;
+      const recent = (vals[vals.length-2] + vals[vals.length-1]) / 2;
+      const diff = ((recent - early) / early * 100).toFixed(0);
+      if (recent > early * 1.05) trendIcon = `<span class="trend-up">↑ ${diff}%</span>`;
+      else if (recent < early * 0.95) trendIcon = `<span class="trend-down">↓ ${Math.abs(diff)}%</span>`;
+      else trendIcon = `<span class="trend-flat">→ Stable</span>`;
+    }
+
+    // Sparkline
+    const max = Math.max(...vals);
+    const spark = vals.map(v => {
+      const h = Math.max(2, Math.round((v/max)*18));
+      return `<div class="spark-bar" style="height:${h}px"></div>`;
+    }).join("");
+
+    return `<tr>
+      <td style="font-weight:500">${name}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${sessionCount} sessions</td>
+      <td style="font-family:'DM Mono',monospace">${metric === "rpe" ? seasonAvg.toFixed(1) : seasonAvg.toLocaleString()}</td>
+      <td style="font-family:'DM Mono',monospace">${metric === "rpe" ? seasonPeak.toFixed(1) : seasonPeak.toLocaleString()}</td>
+      <td><div class="spark">${spark}</div> ${trendIcon}</td>
     </tr>`;
-  }).join('');
-}
-function sortBy(col) {
-  if (sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = -1; }
-  renderPlayerTable();
+  }).join("");
 }
 
-// ─── PLAYER DETAIL ────────────────────────────────────────────────────────────
-function showPlayerDetail(name) {
-  const player = currentSession.players.find(p => p.name === name);
-  if (!player) return;
-  document.getElementById('player-table').style.display = 'none';
-  document.getElementById('player-detail').style.display = 'block';
-  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  const p = currentSession.players;
-  const lr = loadRating(player, p);
-  const pillCls = lr === 'high' ? 'pill-high' : lr === 'low' ? 'pill-low' : 'pill-normal';
 
-  // Header
-  const hdr = document.getElementById('player-header');
-  hdr.innerHTML = `
-    <div class="player-avatar">${initials}</div>
-    <div>
-      <div class="player-info-name">${player.name}</div>
-      <div class="player-info-sub">${currentSession.name} &nbsp;·&nbsp; <span class="load-pill ${pillCls}">${lr.charAt(0).toUpperCase()+lr.slice(1)} load</span></div>
-    </div>
-    ${player.rpe !== null ? `<div class="player-rpe-badge"><div class="player-rpe-val" style="color:${rpeColor(player.rpe)}">${player.rpe}</div><div class="player-rpe-lbl">RPE · ${rpeLabel(player.rpe)}</div></div>` : ''}`;
+// ─── PLAYER PAGES MAP ─────────────────────────────────────────────────────────
+const PLAYER_PAGES = {"Adam Luckhurst": "32b4f9fef5998132948dfff6998df1c7", "Ahmad Al Qaq": "32b4f9fef59981509204f07aa09133d9", "Antonio Gomez": "32b4f9fef59981b7bf00e14661c0a1c9", "Brem Soumaoro": "32b4f9fef59981f7bfa0e33995a28cbc", "Dida Armstrong": "32b4f9fef5998175a03cfdd12f12ac8a", "Edgardo Rito": "32b4f9fef59981589b0bd9c3b5dbd4ac", "Emil J\u00e4\u00e4skel\u00e4inen": "32b4f9fef59981df83f0d4a30bb8aa47", "Ethan Dudley": "32b4f9fef59981ff9eebf16a6acccd58", "Harvey Neville": "32b4f9fef59981eeafc2e6889444e40d", "Jack Proctor": "32b4f9fef5998165af5edc70d5b020f8", "Jacob Evans": "32b4f9fef5998171a4f4fc17ecc098e0", "Jordan Rossiter": "32b4f9fef59981a9a210fd2dc5f11f0b", "Kieran Sadlier": "32b4f9fef59981e6a2dde740ce72f0f2", "Luc Granitur": "32b4f9fef599812abc35c3e5e74a4046", "Mo Traore": "32b4f9fef59981a9bb84e4638faf14ee", "Nijah Reid": "32b4f9fef59981fdba1cf0acb0785f12", "Piero Elias": "32b4f9fef59981bfa25dc3764916a5ec", "Raf Pedder": "32b4f9fef59981ba850eee712b229777", "Ryan Edwards": "32b4f9fef599817bb8c6ded2efcf6335", "Tyshawn Rose": "32b4f9fef599814285cdfdcf24ec668a", "Wahab Ackwei": "32b4f9fef599812995d0caa82b0f5f6c", "Wan Kuzain": "32b4f9fef599815c8126c990b03253ce", "Zeke Soto": "32b4f9fef599819bb35ad19a1c8e0d64", "_hub": "32b4f9fef59981b5b728e2b55421a282"};
+const HUB_PAGE = "32b4f9fef59981b5b728e2b55421a282";
 
-  // Stats
-  const ds = document.getElementById('detail-stats');
-  ds.innerHTML = [
-    { v: fmtK(player.total),    l: 'Total\ndistance', u:'m' },
-    { v: fmtK(player.hmld),     l: 'HMLD', u:'m' },
-    { v: fmtK(player.lsprint),  l: 'Low\nsprint', u:'m' },
-    { v: fmtK(player.hsprint),  l: 'High\nsprint', u:'m' },
-    { v: fmt(player.maxspeed,1),l: 'Max\nspeed', u:'km/h' },
-  ].map(s => `<div class="detail-stat"><div class="detail-stat-val">${s.v}</div><div class="detail-stat-lbl">${s.l}<br><span style="color:var(--muted)">${s.u}</span></div></div>`).join('');
+async function appendPlayerPage(playerPageId, pl, sessionName, sessionDate) {
+  // Append a new session row to the player's Notion page
+  const date = sessionDate || sessionName;
+  const rows = [
+    ["| Session |", "| " + sessionName + " |"],
+    ["| Date |", "| " + date + " |"],
+    ["| Total Distance (m) |", "| " + (pl.total !== null ? Math.round(pl.total).toLocaleString() : "—") + " |"],
+    ["| HMLD (m) |", "| " + (pl.hmld !== null ? Math.round(pl.hmld).toLocaleString() : "—") + " |"],
+    ["| Low Sprint (m) |", "| " + (pl.lsprint !== null ? Math.round(pl.lsprint).toLocaleString() : "—") + " |"],
+    ["| High Sprint (m) |", "| " + (pl.hsprint !== null ? Math.round(pl.hsprint).toLocaleString() : "—") + " |"],
+    ["| Max Speed (km/h) |", "| " + (pl.maxspeed !== null ? pl.maxspeed.toFixed(1) : "—") + " |"],
+    ["| RPE |", "| " + (pl.rpe !== null ? pl.rpe : "—") + " |"],
+    ["| Load Rating |", "| " + (pl.load || "—") + " |"],
+  ];
+  const tableText = "\n\n---\n\n**Session: " + sessionName + "**\n\n| Metric | Value |\n|---|---|\n" +
+    rows.map(r => r[0] + " " + r[1]).join("\n");
 
-  // vs Squad chart
-  destroyChart('playerVsChart');
-  const metLabels = ['Total dist'];
-  const pVals = [player.total], aVals = [avg(p,'total')];
-  if (has('hmld'))    { metLabels.push('HMLD');        pVals.push(player.hmld);    aVals.push(avg(p,'hmld')); }
-  if (has('lsprint')) { metLabels.push('Low sprint');  pVals.push(player.lsprint); aVals.push(avg(p,'lsprint')); }
-  if (has('hsprint')) { metLabels.push('High sprint'); pVals.push(player.hsprint); aVals.push(avg(p,'hsprint')); }
-  setTimeout(() => {
-    charts['playerVsChart'] = new Chart(document.getElementById('playerVsChart'), {
-      type:'bar',
-      data:{ labels:metLabels, datasets:[
-        { label:player.name.split(' ')[0], data:pVals, backgroundColor:'rgba(0,224,122,0.7)', borderRadius:4 },
-        { label:'Squad avg',               data:aVals, backgroundColor:'rgba(255,255,255,0.1)', borderRadius:4 }
-      ]},
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:CHART_DEFAULTS.color,font:{size:11,family:"'DM Mono', monospace"}}}},
-        scales:{ x:{ticks:{color:CHART_DEFAULTS.color,font:{size:11}},grid:{color:CHART_DEFAULTS.gridColor}}, y:{ticks:{color:CHART_DEFAULTS.color,font:{size:11}},grid:{color:CHART_DEFAULTS.gridColor}} } }
-    });
-
-    // RPE distribution
-    const rpeCard = document.getElementById('rpe-dist-card');
-    if (has('rpe') && player.rpe !== null) {
-      rpeCard.style.display = '';
-      const rpeSorted = [...p].filter(x=>x.rpe!==null).sort((a,b)=>a.rpe-b.rpe);
-      const rpeColors = rpeSorted.map(x => x.name===player.name ? rpeColor(x.rpe) : 'rgba(255,255,255,0.1)');
-      destroyChart('rpeDistChart');
-      charts['rpeDistChart'] = new Chart(document.getElementById('rpeDistChart'), {
-        type:'bar', indexAxis:'y',
-        data:{ labels:rpeSorted.map(x=>x.name.split(' ').slice(-1)[0]), datasets:[{ data:rpeSorted.map(x=>x.rpe), backgroundColor:rpeColors, borderRadius:3 }]},
-        options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-          scales:{ x:{min:0,max:10,ticks:{stepSize:1,color:CHART_DEFAULTS.color,font:{size:10}},grid:{color:CHART_DEFAULTS.gridColor}},
-                   y:{ticks:{color:CHART_DEFAULTS.color,font:{size:9}},grid:{color:CHART_DEFAULTS.gridColor}} } }
-      });
-    } else { rpeCard.style.display = 'none'; }
-  }, 50);
-}
-function closeDetail() {
-  document.getElementById('player-table').style.display = '';
-  document.getElementById('player-detail').style.display = 'none';
-  destroyChart('playerVsChart'); destroyChart('rpeDistChart');
+  // Append as a new block on the player page
+  const url = PROXY + encodeURIComponent("https://api.notion.com/v1/blocks/" + playerPageId + "/children");
+  const key = localStorage.getItem("notion_key") || "";
+  await fetch(url, {
+    method: "PATCH",
+    headers: { "Authorization": "Bearer " + key, "Notion-Version": NV, "Content-Type": "application/json" },
+    body: JSON.stringify({ children: [
+      { object: "block", type: "divider", divider: {} },
+      { object: "block", type: "heading_3", heading_3: { rich_text: [{ type: "text", text: { content: "Session: " + sessionName } }] } },
+      { object: "block", type: "table", table: {
+        table_width: 2, has_column_header: true, has_row_header: false,
+        children: [
+          { object: "block", type: "table_row", table_row: { cells: [[{ type: "text", text: { content: "Metric" } }], [{ type: "text", text: { content: "Value" } }]] } },
+          { object: "block", type: "table_row", table_row: { cells: [[{ type: "text", text: { content: "Date" } }], [{ type: "text", text: { content: date } }]] } },
+          { object: "block", type: "table_row", table_row: { cells: [[{ type: "text", text: { content: "Total Distance (m)" } }], [{ type: "text", text: { content: pl.total !== null ? Math.round(pl.total).toLocaleString() : "—" } }]] } },
+          { object: "block", type: "table_row", table_row: { cells: [[{ type: "text", text: { content: "HMLD (m)" } }], [{ type: "text", text: { content: pl.hmld !== null ? Math.round(pl.hmld).toLocaleString() : "—" } }]] } },
+          { object: "block", type: "table_row", table_row: { cells: [[{ type: "text", text: { content: "Low Sprint (m)" } }], [{ type: "text", text: { content: pl.lsprint !== null ? Math.round(pl.lsprint).toLocaleString() : "—" } }]] } },
+          { object: "block", type: "table_row", table_row: { cells: [[{ type: "text", text: { content: "High Sprint (m)" } }], [{ type: "text", text: { content: pl.hsprint !== null ? Math.round(pl.hsprint).toLocaleString() : "—" } }]] } },
+          { object: "block", type: "table_row", table_row: { cells: [[{ type: "text", text: { content: "Max Speed (km/h)" } }], [{ type: "text", text: { content: pl.maxspeed !== null ? pl.maxspeed.toFixed(1) : "—" } }]] } },
+          { object: "block", type: "table_row", table_row: { cells: [[{ type: "text", text: { content: "RPE" } }], [{ type: "text", text: { content: pl.rpe !== null ? String(pl.rpe) : "—" } }]] } },
+          { object: "block", type: "table_row", table_row: { cells: [[{ type: "text", text: { content: "Load Rating" } }], [{ type: "text", text: { content: pl.load || "—" } }]] } },
+        ]
+      } },
+    ] })
+  });
 }
 
-// ─── COMPARE TAB ──────────────────────────────────────────────────────────────
-function renderCompare() {
-  if (sessions.length < 2) { document.getElementById('compare-upload').style.display = ''; return; }
-  document.getElementById('compare-upload').style.display = 'none';
-  renderCompareCharts();
-}
-function handleCmpFile(file) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    const { headers, rows } = parseCSV(e.target.result);
-    const mapped = {};
-    for (const f of Object.keys(FIELDS)) { const found = detectCol(headers, f); if (found) mapped[f] = found; }
-    if (!mapped.name || !mapped.total) { alert('Could not auto-detect columns in second CSV. Please check the file.'); return; }
-    const players = rows.map(r => ({
-      name:r[mapped.name]?.trim()||'Unknown', total:parseNum(r[mapped.total]),
-      hmld:mapped.hmld?(parseNum(r[mapped.hmld])):null,
-      lsprint:mapped.lsprint?(parseNum(r[mapped.lsprint])):null,
-      hsprint:mapped.hsprint?(parseNum(r[mapped.hsprint])):null,
-      rpe:mapped.rpe?(parseNum(r[mapped.rpe])):null,
-    })).filter(p=>p.total>0);
-    sessions.push({ name:file.name.replace(/\.csv$/i,''), players });
-    renderCompareCharts();
-  };
-  reader.readAsText(file);
-}
-function renderCompareCharts() {
-  const s1 = sessions[sessions.length-2], s2 = sessions[sessions.length-1];
-  const allNames = [...new Set([...s1.players.map(p=>p.name),...s2.players.map(p=>p.name)])];
-  const labels = allNames.map(n=>n.split(' ').slice(-1)[0]);
-  const get = (sess,name,key) => { const p=sess.players.find(x=>x.name===name); return (p && p[key]!==null) ? p[key] : 0; };
-  const cc = document.getElementById('compare-charts');
-  const h = (id) => Math.max(200, allNames.length*32+80);
+async function createSessionSummaryPage(session) {
+  const key = localStorage.getItem("notion_key") || "";
+  if (!key) return;
+  const p = session.players;
+  const avgTotal = Math.round(p.map(x=>x.total||0).reduce((a,b)=>a+b,0)/p.length);
+  const maxPlayer = [...p].sort((a,b)=>(b.total||0)-(a.total||0))[0];
+  const minPlayer = [...p].sort((a,b)=>(a.total||0)-(b.total||0))[0];
 
-  ['cmpTotal','cmpHMLD','cmpSprint','cmpRPE'].forEach(id => destroyChart(id));
+  const highLoad = p.filter(pl=>pl.load==="High").map(pl=>pl.name).join(", ") || "None";
+  const normalLoad = p.filter(pl=>pl.load==="Normal").map(pl=>pl.name).join(", ") || "None";
+  const lowLoad = p.filter(pl=>pl.load==="Low").map(pl=>pl.name).join(", ") || "None";
 
-  cc.innerHTML = `
-    <div class="chart-row cols-1">
-      <div class="chart-card">
-        <div class="chart-head">
-          <div class="chart-title">Total distance</div>
-          <div class="legend">
-            <div class="leg-item"><div class="leg-dot" style="background:#00e07a"></div>${s1.name}</div>
-            <div class="leg-item"><div class="leg-dot" style="background:#0088ff"></div>${s2.name}</div>
-          </div>
-        </div>
-        <div class="chart-wrap" style="height:${h()}px"><canvas id="cmpTotal"></canvas></div>
-      </div>
-    </div>
-    <div class="chart-row cols-2">
-      <div class="chart-card">
-        <div class="chart-head"><div class="chart-title">HMLD</div></div>
-        <div class="chart-wrap" style="height:${h()}px"><canvas id="cmpHMLD"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-head">
-          <div class="chart-title">Sprint zones</div>
-          <div class="legend">
-            <div class="leg-item"><div class="leg-dot" style="background:#ff9f1c"></div>Low · S1</div>
-            <div class="leg-item"><div class="leg-dot" style="background:#ff4d4d"></div>High · S1</div>
-            <div class="leg-item"><div class="leg-dot" style="background:#ffce70"></div>Low · S2</div>
-            <div class="leg-item"><div class="leg-dot" style="background:#ff9090"></div>High · S2</div>
-          </div>
-        </div>
-        <div class="chart-wrap" style="height:${h()}px"><canvas id="cmpSprint"></canvas></div>
-      </div>
-    </div>
-    <div class="chart-row cols-1" id="cmp-rpe-row">
-      <div class="chart-card">
-        <div class="chart-head"><div class="chart-title">RPE comparison</div></div>
-        <div class="chart-wrap" style="height:${h()}px"><canvas id="cmpRPE"></canvas></div>
-      </div>
-    </div>`;
+  const tableRows = p.map(pl =>
+    "| " + pl.name + " | " +
+    (pl.total!==null?Math.round(pl.total).toLocaleString():"—") + " | " +
+    (pl.hmld!==null?Math.round(pl.hmld).toLocaleString():"—") + " | " +
+    (pl.lsprint!==null?Math.round(pl.lsprint).toLocaleString():"—") + " | " +
+    (pl.hsprint!==null?Math.round(pl.hsprint).toLocaleString():"—") + " | " +
+    (pl.maxspeed!==null?pl.maxspeed.toFixed(1):"—") + " | " +
+    (pl.rpe!==null?pl.rpe:"—") + " | " +
+    (pl.load||"—") + " |"
+  ).join("\n");
 
-  const bOpts = { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-    scales:{ x:{ticks:{color:CHART_DEFAULTS.color,font:{size:10}},grid:{color:CHART_DEFAULTS.gridColor}},
-             y:{ticks:{color:CHART_DEFAULTS.color,font:{size:9}},grid:{color:CHART_DEFAULTS.gridColor}} } };
+  const content = "**Date:** " + (session.date||session.name) + "\n\n---\n\n## Squad summary\n\n| Metric | Squad avg | Highest | Lowest |\n|---|---|---|---|\n" +
+    "| Total Distance (m) | " + avgTotal.toLocaleString() + " | " + maxPlayer.name + " (" + Math.round(maxPlayer.total||0).toLocaleString() + ") | " + minPlayer.name + " (" + Math.round(minPlayer.total||0).toLocaleString() + ") |\n\n" +
+    "## Load distribution\n\n| Rating | Players |\n|---|---|\n" +
+    "| 🟢 High | " + highLoad + " |\n" +
+    "| 🟡 Normal | " + normalLoad + " |\n" +
+    "| 🔴 Low | " + lowLoad + " |\n\n" +
+    "## Individual results\n\n| Player | Total dist | HMLD | Low sprint | High sprint | Max speed | RPE | Load |\n|---|---|---|---|---|---|---|---|\n" +
+    tableRows + "\n\n---\n\n## Session notes\n\n> Add coaching or physiotherapy observations here.";
 
-  setTimeout(() => {
-    charts['cmpTotal'] = new Chart(document.getElementById('cmpTotal'),{
-      type:'bar', indexAxis:'y',
-      data:{labels, datasets:[
-        {label:s1.name, data:allNames.map(n=>get(s1,n,'total')), backgroundColor:'rgba(0,224,122,0.7)', borderRadius:3},
-        {label:s2.name, data:allNames.map(n=>get(s2,n,'total')), backgroundColor:'rgba(0,136,255,0.7)', borderRadius:3}
-      ]}, options:bOpts
-    });
-    charts['cmpHMLD'] = new Chart(document.getElementById('cmpHMLD'),{
-      type:'bar', indexAxis:'y',
-      data:{labels, datasets:[
-        {label:s1.name, data:allNames.map(n=>get(s1,n,'hmld')), backgroundColor:'rgba(0,224,122,0.7)', borderRadius:3},
-        {label:s2.name, data:allNames.map(n=>get(s2,n,'hmld')), backgroundColor:'rgba(0,136,255,0.7)', borderRadius:3}
-      ]}, options:bOpts
-    });
-    charts['cmpSprint'] = new Chart(document.getElementById('cmpSprint'),{
-      type:'bar', indexAxis:'y',
-      data:{labels, datasets:[
-        {label:'Low S1', data:allNames.map(n=>get(s1,n,'lsprint')), backgroundColor:'rgba(255,159,28,0.75)', borderRadius:3},
-        {label:'High S1',data:allNames.map(n=>get(s1,n,'hsprint')), backgroundColor:'rgba(255,77,77,0.75)', borderRadius:3},
-        {label:'Low S2', data:allNames.map(n=>get(s2,n,'lsprint')), backgroundColor:'rgba(255,206,112,0.6)', borderRadius:3},
-        {label:'High S2',data:allNames.map(n=>get(s2,n,'hsprint')), backgroundColor:'rgba(255,144,144,0.6)', borderRadius:3},
-      ]}, options:bOpts
-    });
-    const hasRPE = s1.players.some(p=>p.rpe!==null)||s2.players.some(p=>p.rpe!==null);
-    const rpeRow = document.getElementById('cmp-rpe-row');
-    if (hasRPE) {
-      charts['cmpRPE'] = new Chart(document.getElementById('cmpRPE'),{
-        type:'bar', indexAxis:'y',
-        data:{labels, datasets:[
-          {label:s1.name, data:allNames.map(n=>get(s1,n,'rpe')), backgroundColor:'rgba(0,224,122,0.7)', borderRadius:3},
-          {label:s2.name, data:allNames.map(n=>get(s2,n,'rpe')), backgroundColor:'rgba(0,136,255,0.7)', borderRadius:3}
-        ]},
-        options:{...bOpts, scales:{x:{min:0,max:10,ticks:{stepSize:1,color:CHART_DEFAULTS.color,font:{size:10}},grid:{color:CHART_DEFAULTS.gridColor}},y:{ticks:{color:CHART_DEFAULTS.color,font:{size:9}},grid:{color:CHART_DEFAULTS.gridColor}}}}
-      });
-    } else { rpeRow.style.display='none'; }
-  }, 50);
+  const url = PROXY + encodeURIComponent("https://api.notion.com/v1/pages");
+  await fetch(url, {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + key, "Notion-Version": NV, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      parent: { page_id: HUB_PAGE },
+      icon: { type: "emoji", emoji: "📊" },
+      properties: { title: { title: [{ text: { content: "Session Summary — " + session.name } }] } },
+      children: [
+        { object: "block", type: "paragraph", paragraph: { rich_text: [{ type: "text", text: { content: content } }] } }
+      ]
+    })
+  });
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
 initDropzone();
 </script>
 </body>

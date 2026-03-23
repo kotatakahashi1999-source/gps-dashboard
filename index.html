@@ -3,134 +3,1090 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sporting Jax — GPS Dashboard</title>
+<title>Sporting Club Jacksonville — GPS</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-:root{--bg:#0d0f12;--bg2:#13161b;--bg3:#1a1e25;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--text:#e8eaed;--muted:#7a8090;--accent:#00e07a;--accent2:#0088ff;--warn:#ff9f1c;--danger:#ff4d4d;--mono:"DM Mono",monospace;--head:"Barlow Condensed",sans-serif;--body:"Barlow",sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}
-html{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14px}
-#upload-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden}
-#upload-screen::before{content:"";position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(0,224,122,0.06) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
-.brand{font-family:var(--head);font-size:13px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:2.5rem;display:flex;align-items:center;gap:8px}
-.brand-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
-.upload-title{font-family:var(--head);font-size:clamp(2rem,5vw,3.5rem);font-weight:700;line-height:1.1;text-align:center;margin-bottom:1rem}
-.upload-title span{color:var(--accent)}
-.upload-sub{font-size:15px;color:var(--muted);text-align:center;margin-bottom:2.5rem;max-width:420px;line-height:1.6}
-.drop-zone{width:100%;max-width:480px;border:1.5px dashed var(--border2);border-radius:16px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;background:var(--bg2)}
-.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:rgba(0,224,122,0.04)}
-.drop-icon{width:52px;height:52px;border-radius:12px;background:rgba(0,224,122,0.1);border:1px solid rgba(0,224,122,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:22px}
-.drop-label{font-family:var(--head);font-size:16px;font-weight:600;margin-bottom:6px}
-.drop-hint{font-size:13px;color:var(--muted)}
-.drop-btn{display:inline-block;margin-top:1.25rem;padding:10px 24px;border-radius:8px;background:var(--accent);color:#000;font-family:var(--head);font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border:none;transition:opacity .15s}
-.drop-btn:hover{opacity:.85}
-#file-input{display:none}
-.supported{margin-top:1.5rem;font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
-.tag{padding:2px 8px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--muted)}
-.error-banner{margin-top:1rem;padding:10px 16px;background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.3);border-radius:8px;color:#ff8080;font-size:13px;max-width:480px;display:none}
-#col-mapper{display:none;width:100%;max-width:560px;margin-top:1.5rem;background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:1.5rem}
-.mapper-title{font-family:var(--head);font-size:15px;font-weight:600;margin-bottom:1rem}
-.mapper-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.mapper-row{display:flex;flex-direction:column;gap:4px}
-.mapper-label{font-size:11px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.mapper-label .req{color:var(--danger);margin-left:2px}
-.mapper-select{padding:7px 10px;border-radius:7px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:var(--body);font-size:13px}
-.mapper-confirm{margin-top:1rem;padding:9px 22px;border-radius:8px;background:var(--accent);color:#000;font-family:var(--head);font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border:none}
-#dashboard{display:none;min-height:100vh}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px}
-.topbar-left{display:flex;align-items:center;gap:14px}
-.topbar-brand{font-family:var(--head);font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
-.session-pill{padding:3px 10px;border-radius:20px;background:var(--bg3);border:1px solid var(--border2);font-family:var(--mono);font-size:11px;color:var(--muted)}
-.topbar-right{display:flex;gap:8px;align-items:center}
-.topbar-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border2);background:transparent;color:var(--text);font-family:var(--head);font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:border-color .15s,color .15s}
-.topbar-btn:hover{border-color:var(--accent);color:var(--accent)}
-.sync-btn{padding:7px 18px;border-radius:8px;border:none;background:var(--accent);color:#000;font-family:var(--head);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .15s}
-.sync-btn:hover{opacity:.85}
-.sync-btn:disabled{opacity:.4;cursor:not-allowed}
-.sync-btn.syncing{background:var(--warn)}
-.sync-btn.synced{background:#1a3a2a;color:var(--accent);border:1px solid rgba(0,224,122,0.3)}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:currentColor}
-#sync-panel{display:none;margin:0 24px 16px;padding:14px 18px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px}
-.sync-panel-title{font-family:var(--head);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.sync-log{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto}
-.sync-log-item{font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:5px;background:var(--bg3)}
-.sync-log-item.ok{color:var(--accent)}
-.sync-log-item.err{color:var(--danger)}
-.sync-log-item.pending{color:var(--muted)}
-.sync-summary{margin-top:8px;font-size:12px;color:var(--muted);font-family:var(--mono)}
-.tabs{display:flex;padding:0 24px;border-bottom:1px solid var(--border);background:var(--bg)}
-.tab{padding:12px 18px;font-family:var(--head);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.tab-content{padding:24px}
-.tab-pane{display:none}
-.tab-pane.active{display:block}
-.metrics-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:20px}
-.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden}
-.metric-card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);opacity:.5}
-.metric-card.warn::before{background:var(--warn)}
-.metric-card.info::before{background:var(--accent2)}
-.metric-card.danger::before{background:var(--danger)}
-.metric-lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px}
-.metric-val{font-family:var(--head);font-size:26px;font-weight:700;line-height:1}
-.metric-unit{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px}
-.chart-row{display:grid;gap:14px;margin-bottom:14px}
-.chart-row.cols-2{grid-template-columns:1fr 1fr}
-.chart-row.cols-1{grid-template-columns:1fr}
-.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px}
-.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
-.chart-title{font-family:var(--head);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.legend{display:flex;gap:12px;flex-wrap:wrap}
-.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-family:var(--mono)}
-.leg-dot{width:8px;height:8px;border-radius:2px}
-.chart-wrap{position:relative}
-.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.data-table{width:100%;border-collapse:collapse}
-.data-table th{padding:10px 14px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);text-align:left;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;user-select:none;background:var(--bg3)}
-.data-table th:hover{color:var(--text)}
-.data-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;white-space:nowrap}
-.data-table tr:last-child td{border-bottom:none}
-.data-table tr.clickable:hover td{background:var(--bg3);cursor:pointer}
-.bar-wrap{display:flex;align-items:center;gap:8px}
-.bar-bg{flex:1;height:4px;background:var(--bg3);border-radius:2px;min-width:60px}
-.bar-fill{height:100%;border-radius:2px;background:var(--accent)}
-.load-pill{display:inline-block;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.05em;text-transform:uppercase}
-.pill-high{background:rgba(0,224,122,0.12);color:var(--accent);border:1px solid rgba(0,224,122,0.2)}
-.pill-normal{background:rgba(255,159,28,0.1);color:var(--warn);border:1px solid rgba(255,159,28,0.2)}
-.pill-low{background:rgba(255,77,77,0.1);color:var(--danger);border:1px solid rgba(255,77,77,0.2)}
-.rpe-num{font-family:var(--mono);font-size:12px;font-weight:500;padding:2px 8px;border-radius:4px}
-#player-detail{display:none}
-.back-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--head);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);cursor:pointer;margin-bottom:20px;transition:color .15s;background:none;border:none;padding:0}
-.back-btn:hover{color:var(--accent)}
-.player-header{display:flex;align-items:center;gap:18px;margin-bottom:20px}
-.player-avatar{width:52px;height:52px;border-radius:12px;background:rgba(0,224,122,0.1);border:1px solid rgba(0,224,122,0.2);display:flex;align-items:center;justify-content:center;font-family:var(--head);font-size:18px;font-weight:700;color:var(--accent)}
-.player-info-name{font-family:var(--head);font-size:24px;font-weight:700}
-.player-info-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:3px}
-.player-rpe-badge{margin-left:auto;text-align:right}
-.player-rpe-val{font-family:var(--head);font-size:32px;font-weight:700;line-height:1}
-.player-rpe-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
-.detail-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:20px}
-.detail-stat{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
-.detail-stat-val{font-family:var(--head);font-size:22px;font-weight:700;line-height:1}
-.detail-stat-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:5px;line-height:1.3}
-.rpe-entry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
-.rpe-player-row{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.rpe-player-name{font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rpe-btns{display:flex;gap:3px}
-.rpe-btn{width:24px;height:24px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .1s;display:flex;align-items:center;justify-content:center}
-.rpe-btn:hover{border-color:var(--warn);color:var(--warn)}
-.rpe-btn.active{background:var(--warn);color:#000;border-color:var(--warn)}
-.compare-upload{background:var(--bg2);border:1.5px dashed var(--border2);border-radius:12px;padding:2rem;text-align:center;margin-bottom:20px}
-.compare-upload-title{font-family:var(--head);font-size:15px;font-weight:600;margin-bottom:6px}
-.compare-upload-sub{font-size:13px;color:var(--muted);margin-bottom:1rem}
-@media(max-width:900px){.metrics-row,.detail-stats{grid-template-columns:repeat(3,1fr)}.chart-row.cols-2{grid-template-columns:1fr}}
-@media(max-width:600px){.metrics-row,.detail-stats{grid-template-columns:repeat(2,1fr)}.topbar,.tab-content{padding:12px 16px}.tabs{padding:0 16px;overflow-x:auto}.mapper-grid{grid-template-columns:1fr}}
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
-.trend-up{color:#00e07a}
-.trend-down{color:#ff4d4d}
-.trend-flat{color:#7a8090}
-.spark{display:inline-flex;align-items:flex-end;gap:2px;height:20px;vertical-align:middle}
-.spark-bar{width:5px;border-radius:2px;background:#00e07a;opacity:.7;min-height:2px}
+/* ── SPORTING JAX PALETTE ─────────────────────────────────────────────
+   Extracted from official LinkedIn banner:
+   Sky blue #4AADE8 · White #FFFFFF · Yellow #F5D800 · Orange #F07830
+   Periwinkle edge #B8C8E8
+──────────────────────────────────────────────────────────────────────── */
+:root {
+  --sky:         #4AADE8;
+  --sky-light:   #7DC5F0;
+  --sky-pale:    #D6ECFA;
+  --sky-wash:    #EEF6FD;
+  --periwinkle:  #B8C8E8;
+  --white:       #FFFFFF;
+  --yellow:      #F5D800;
+  --orange:      #F07830;
+  --navy-text:   #0D2B4E;
+  --body-text:   #1E3A5F;
+  --muted-text:  #5A7A9A;
+  --border:      rgba(74,173,232,0.18);
+  --border-med:  rgba(74,173,232,0.32);
+
+  /* semantic */
+  --bg:          var(--sky-wash);
+  --surface:     var(--white);
+  --surface2:    var(--sky-pale);
+  --text:        var(--body-text);
+  --text-strong: var(--navy-text);
+  --accent:      var(--sky);
+  --accent-text: var(--white);
+
+  /* load colours — orange=high, sky=normal, periwinkle=low */
+  --load-high:   var(--orange);
+  --load-normal: var(--sky);
+  --load-low:    var(--periwinkle);
+
+  --mono: "DM Mono", monospace;
+  --head: "Barlow Condensed", sans-serif;
+  --body: "Barlow", sans-serif;
+  --radius:    8px;
+  --radius-lg: 12px;
+  --shadow:    0 1px 4px rgba(13,43,78,0.08), 0 4px 16px rgba(13,43,78,0.06);
+  --shadow-sm: 0 1px 3px rgba(13,43,78,0.07);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--sky-wash);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── UPLOAD SCREEN ───────────────────────────────────────────────────── */
+#upload-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: linear-gradient(160deg, #DCEEFB 0%, #EEF6FD 40%, #F5F9FF 100%);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--head);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted-text);
+  margin-bottom: 40px;
+}
+
+.brand-dot {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--yellow) 0%, var(--orange) 100%);
+}
+
+#upload-screen .upload-title {
+  font-family: var(--head);
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-align: center;
+  color: var(--navy-text);
+  line-height: 1.1;
+  margin-bottom: 14px;
+  max-width: 540px;
+}
+
+#upload-screen .upload-title span {
+  color: var(--sky);
+}
+
+.upload-sub {
+  color: var(--muted-text);
+  font-size: 15px;
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.7;
+  margin-bottom: 36px;
+  font-weight: 400;
+}
+
+.drop-zone {
+  width: 100%;
+  max-width: 500px;
+  border: 2px dashed var(--border-med);
+  border-radius: var(--radius-lg);
+  padding: 44px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+}
+
+.drop-zone { cursor: pointer; }
+.drop-hint-click {
+  font-size: 12px;
+  color: var(--sky);
+  margin-top: 2px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--sky);
+  background: #F0F9FF;
+  box-shadow: 0 0 0 4px rgba(74,173,232,0.12), var(--shadow);
+}
+
+.drop-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.6; }
+
+.drop-label {
+  font-family: var(--head);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy-text);
+  margin-bottom: 5px;
+}
+
+.drop-hint {
+  font-size: 13px;
+  color: var(--muted-text);
+  margin-bottom: 20px;
+}
+
+.drop-btn {
+  background: var(--sky);
+  color: var(--white);
+  border: none;
+  padding: 11px 28px;
+  border-radius: 100px;
+  font-family: var(--head);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.drop-btn:hover {
+  background: #3498D4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(74,173,232,0.35);
+}
+
+#auto-sync-hint {
+  color: #2E8B57 !important;
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+}
+
+.supported {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--muted-text);
+  max-width: 500px;
+}
+
+.tag {
+  background: var(--sky-pale);
+  border: 1px solid var(--border);
+  color: var(--sky);
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.error-banner {
+  color: #C0392B;
+  font-size: 13px;
+  margin-top: 12px;
+  font-family: var(--mono);
+}
+
+/* ── COL MAPPER ──────────────────────────────────────────────────────── */
+#col-mapper { width: 100%; max-width: 500px; margin-top: 16px; }
+
+.mapper-title {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-text);
+  margin-bottom: 12px;
+}
+
+.mapper-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mapper-grid label {
+  font-size: 10px;
+  color: var(--muted-text);
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  display: block;
+}
+
+.mapper-grid select {
+  width: 100%;
+  background: var(--white);
+  border: 1px solid var(--border-med);
+  color: var(--text);
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-family: var(--body);
+  outline: none;
+  transition: border-color 0.18s;
+}
+
+.mapper-grid select:focus { border-color: var(--sky); }
+
+.mapper-confirm {
+  background: var(--sky);
+  color: var(--white);
+  border: none;
+  width: 100%;
+  padding: 11px;
+  border-radius: 100px;
+  font-family: var(--head);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.mapper-confirm:hover { background: #3498D4; }
+
+/* ── TOPBAR ──────────────────────────────────────────────────────────── */
+#dashboard { display: none; }
+
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 0 var(--border), 0 2px 8px rgba(13,43,78,0.05);
+}
+
+.topbar-left { display: flex; align-items: center; gap: 6px; }
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--head);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--navy-text);
+}
+
+.topbar-brand::before {
+  content: 'SJ';
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--yellow) 40%, var(--orange) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--white);
+  flex-shrink: 0;
+}
+
+.session-pill {
+  background: var(--sky-pale);
+  border: 1px solid var(--border);
+  color: var(--sky);
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--mono);
+  margin-left: 8px;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+.topbar-btn {
+  background: transparent;
+  border: 1px solid var(--border-med);
+  color: var(--muted-text);
+  padding: 6px 14px;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transition: all 0.18s;
+}
+
+.topbar-btn:hover { background: var(--sky-pale); color: var(--sky); border-color: var(--sky); }
+.topbar-btn.active { background: var(--sky); color: var(--white); border-color: var(--sky); }
+
+/* ── SYNC BUTTON ─────────────────────────────────────────────────────── */
+.sync-btn {
+  background: var(--sky);
+  border: none;
+  color: var(--white);
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: 100px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+}
+
+.sync-btn:hover { background: #3498D4; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(74,173,232,0.3); }
+
+.sync-btn.syncing {
+  background: var(--orange);
+  animation: pulse-sync 1.2s ease-in-out infinite;
+}
+
+.sync-btn.synced { background: #2E8B57; cursor: default; }
+
+@keyframes pulse-sync { 0%,100%{opacity:1} 50%{opacity:0.75} }
+
+.sync-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+}
+
+.sync-btn.syncing .sync-dot { animation: blink 0.8s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── CONTAINER ───────────────────────────────────────────────────────── */
+.container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── STAT CARDS ──────────────────────────────────────────────────────── */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.stat-card:hover { box-shadow: var(--shadow); border-color: var(--border-med); }
+.stat-card:hover::after { opacity: 1; }
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-text);
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-family: var(--head);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--navy-text);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.stat-unit { font-size: 11px; color: var(--muted-text); }
+
+.stat-flag {
+  position: absolute;
+  top: 12px; right: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 100px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.flag-high   { background: rgba(240,120,48,0.12); color: var(--orange); }
+.flag-normal { background: rgba(74,173,232,0.12); color: var(--sky); }
+.flag-low    { background: rgba(184,200,232,0.25); color: var(--muted-text); }
+.flag-ok     { background: rgba(46,139,87,0.12);  color: #2E8B57; }
+
+/* ── SECTION HEADS ───────────────────────────────────────────────────── */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 22px 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-head h3 {
+  font-family: var(--head);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--muted-text);
+}
+
+.section-note { font-size: 11px; color: var(--muted-text); }
+
+/* ── CHART BOXES ─────────────────────────────────────────────────────── */
+.chart-box {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.chart-box canvas { max-height: 260px; }
+
+.chart-title {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-text);
+  margin-bottom: 16px;
+}
+
+/* ── DATA TABLE ──────────────────────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table th {
+  font-family: var(--head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-text);
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  background: var(--sky-wash);
+}
+
+.data-table th:hover { color: var(--sky); }
+
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(74,173,232,0.07);
+  color: var(--text);
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.data-table tr:hover td { background: var(--sky-wash); }
+.data-table tr:last-child td { border-bottom: none; }
+
+.name-cell {
+  font-family: var(--body) !important;
+  font-weight: 600;
+  font-size: 13px !important;
+  color: var(--navy-text) !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.name-cell:hover { color: var(--sky) !important; }
+
+.player-init {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sky) 0%, #2272A8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--white);
+  flex-shrink: 0;
+}
+
+.load-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 100px;
+  font-family: var(--body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.load-High   { background: rgba(240,120,48,0.12); color: var(--orange); }
+.load-Normal { background: rgba(74,173,232,0.12); color: var(--sky); }
+.load-Low    { background: rgba(184,200,232,0.2); color: var(--muted-text); }
+
+/* ── PLAYER DETAIL ───────────────────────────────────────────────────── */
+.player-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--sky);
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-sm);
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+
+.player-init-lg {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--yellow) 0%, var(--orange) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--head);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--white);
+  flex-shrink: 0;
+}
+
+.player-detail-name {
+  font-family: var(--head);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--navy-text);
+}
+
+.player-detail-meta { font-size: 12px; color: var(--muted-text); margin-top: 2px; }
+
+.btn-back {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border-med);
+  color: var(--muted-text);
+  padding: 7px 14px;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transition: all 0.18s;
+}
+
+.btn-back:hover { background: var(--sky-pale); color: var(--sky); border-color: var(--sky); }
+
+/* ── COMPARE ─────────────────────────────────────────────────────────── */
+.compare-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+/* ── TREND CONTROLS ──────────────────────────────────────────────────── */
+.trend-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.trend-controls select {
+  background: var(--white);
+  border: 1px solid var(--border-med);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-family: var(--body);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.18s;
+}
+
+.trend-controls select:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rgba(74,173,232,0.15); }
+
+/* ── PEAK CARDS ──────────────────────────────────────────────────────── */
+.peak-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.peak-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.peak-label { font-size: 10px; color: var(--muted-text); letter-spacing: 1px; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+.peak-value { font-family: var(--head); font-size: 22px; font-weight: 800; color: var(--sky); }
+.peak-player { font-size: 11px; color: var(--muted-text); margin-top: 2px; }
+
+/* ── SYNC PANEL ──────────────────────────────────────────────────────── */
+#sync-panel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--sky);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  margin-top: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sync-log-hdr {
+  font-family: var(--head);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted-text);
+  margin-bottom: 8px;
+}
+
+#sync-log {
+  font-family: var(--mono);
+  font-size: 11px;
+  max-height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.log-line       { color: var(--muted-text); }
+.log-line.ok    { color: #2E8B57; }
+.log-line.err   { color: #C0392B; }
+.log-line.pending { color: var(--sky); }
+
+#sync-summary {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted-text);
+  font-family: var(--mono);
+}
+
+/* ── NOTION KEY ──────────────────────────────────────────────────────── */
+.key-row { display: flex; gap: 8px; margin-top: 12px; }
+
+.key-row input {
+  flex: 1;
+  background: var(--sky-wash);
+  border: 1px solid var(--border-med);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.18s;
+}
+
+.key-row input:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rgba(74,173,232,0.12); }
+
+.key-row button {
+  background: var(--sky);
+  border: none;
+  color: var(--white);
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.key-row button:hover { background: #3498D4; }
+
+/* ── SUMMARY TABLE ───────────────────────────────────────────────────── */
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.summary-table th {
+  font-family: var(--head);
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted-text);
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--sky-wash);
+}
+
+.summary-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(74,173,232,0.06);
+  font-family: var(--mono);
+  color: var(--body-text);
+}
+
+.summary-table tr:hover td { background: var(--sky-wash); }
+
+/* ── SPARKLINES / TREND ──────────────────────────────────────────────── */
+.spark { font-family: var(--mono); font-size: 11px; color: var(--muted-text); }
+.trend-up   { color: var(--orange); }
+.trend-down { color: var(--sky); }
+.trend-flat { color: var(--muted-text); }
+
+/* ── SCROLLBAR ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--periwinkle); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sky); }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .topbar { padding: 0 16px; }
+  .container { padding: 14px; }
+  .stat-cards { grid-template-columns: repeat(2, 1fr); }
+  .compare-cols { grid-template-columns: 1fr; }
+  .topbar-btn { padding: 5px 10px; font-size: 10px; }
+}
+
+@media (max-width: 480px) {
+  .topbar-right .topbar-btn:not(.active):not(:last-child) { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DARK THEME — Sporting JAX
+   Activates automatically when OS/browser is in dark mode.
+   Sky blue accent + dark navy surfaces + white/light text.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Surfaces — deep navy layering */
+    --bg:          #0E1C2F;
+    --surface:     #142336;
+    --surface2:    #1A2D43;
+    --sky-wash:    #0E1C2F;
+    --sky-pale:    #1A2D43;
+
+    /* Text */
+    --navy-text:   #E8F4FF;
+    --body-text:   #C2D8EE;
+    --muted-text:  #6E90B0;
+    --white:       #F0F8FF;
+
+    /* Borders */
+    --border:      rgba(74,173,232,0.14);
+    --border-med:  rgba(74,173,232,0.26);
+
+    /* Shadows — darker & deeper */
+    --shadow:    0 2px 8px rgba(0,0,0,0.35), 0 8px 24px rgba(0,0,0,0.25);
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+
+    /* Keep brand accents identical */
+    --sky:        #4AADE8;
+    --sky-light:  #7DC5F0;
+    --yellow:     #F5D800;
+    --orange:     #F07830;
+    --periwinkle: #5A7EA8;
+  }
+
+  /* ── BODY ──────────────────────────────────────────────────────────── */
+  body { background: #0E1C2F; }
+
+  /* ── UPLOAD SCREEN ─────────────────────────────────────────────────── */
+  #upload-screen {
+    background: linear-gradient(160deg, #0E1C2F 0%, #132030 50%, #0A1520 100%);
+  }
+
+  .drop-zone {
+    background: #142336;
+    border-color: rgba(74,173,232,0.25);
+  }
+
+  .drop-zone:hover, .drop-zone.drag-over {
+    background: #1A2D43;
+    border-color: var(--sky);
+    box-shadow: 0 0 0 4px rgba(74,173,232,0.1), var(--shadow);
+  }
+
+  .drop-label { color: #E8F4FF; }
+  .upload-sub { color: var(--muted-text); }
+
+  #upload-screen .upload-title { color: #E8F4FF; }
+
+  .tag {
+    background: rgba(74,173,232,0.12);
+    border-color: rgba(74,173,232,0.2);
+    color: var(--sky-light);
+  }
+
+  /* ── TOPBAR ────────────────────────────────────────────────────────── */
+  .topbar {
+    background: #0B1825;
+    border-bottom: 1px solid rgba(74,173,232,0.12);
+    box-shadow: 0 1px 0 rgba(74,173,232,0.08), 0 2px 12px rgba(0,0,0,0.4);
+  }
+
+  .topbar-brand { color: #E8F4FF; }
+
+  .session-pill {
+    background: rgba(74,173,232,0.12);
+    border-color: rgba(74,173,232,0.2);
+    color: var(--sky-light);
+  }
+
+  .topbar-btn {
+    border-color: rgba(74,173,232,0.18);
+    color: var(--muted-text);
+  }
+
+  .topbar-btn:hover {
+    background: rgba(74,173,232,0.12);
+    color: var(--sky-light);
+    border-color: rgba(74,173,232,0.3);
+  }
+
+  .topbar-btn.active {
+    background: var(--sky);
+    color: #0E1C2F;
+    border-color: var(--sky);
+  }
+
+  /* ── STAT CARDS ────────────────────────────────────────────────────── */
+  .stat-card {
+    background: #142336;
+    border-color: rgba(74,173,232,0.12);
+  }
+
+  .stat-card:hover { border-color: rgba(74,173,232,0.25); }
+
+  .stat-label  { color: var(--muted-text); }
+  .stat-value  { color: #E8F4FF; }
+  .stat-unit   { color: var(--muted-text); }
+
+  /* ── SECTION HEADS ─────────────────────────────────────────────────── */
+  .section-head {
+    border-bottom-color: rgba(74,173,232,0.1);
+  }
+  .section-head h3 { color: var(--muted-text); }
+
+  /* ── CHART BOXES ───────────────────────────────────────────────────── */
+  .chart-box {
+    background: #142336;
+    border-color: rgba(74,173,232,0.12);
+  }
+
+  .chart-title { color: var(--muted-text); }
+
+  /* ── DATA TABLE ────────────────────────────────────────────────────── */
+  .data-table th {
+    background: #0E1C2F;
+    color: var(--muted-text);
+    border-bottom-color: rgba(74,173,232,0.1);
+  }
+
+  .data-table th:hover { color: var(--sky-light); }
+
+  .data-table td {
+    color: var(--body-text);
+    border-bottom-color: rgba(74,173,232,0.06);
+  }
+
+  .data-table tr:hover td { background: rgba(74,173,232,0.05); }
+
+  .name-cell { color: #E8F4FF !important; }
+  .name-cell:hover { color: var(--sky-light) !important; }
+
+  /* ── LOAD BADGES ───────────────────────────────────────────────────── */
+  .load-High   { background: rgba(240,120,48,0.15);  color: #F09060; }
+  .load-Normal { background: rgba(74,173,232,0.14);  color: var(--sky-light); }
+  .load-Low    { background: rgba(90,126,168,0.2);   color: #8AAAC8; }
+
+  .flag-high   { background: rgba(240,120,48,0.15);  color: #F09060; }
+  .flag-normal { background: rgba(74,173,232,0.14);  color: var(--sky-light); }
+  .flag-low    { background: rgba(90,126,168,0.2);   color: #8AAAC8; }
+  .flag-ok     { background: rgba(46,139,87,0.15);   color: #5DBF8A; }
+
+  /* ── PLAYER DETAIL ─────────────────────────────────────────────────── */
+  .player-detail-header {
+    background: #142336;
+    border-color: rgba(74,173,232,0.15);
+    border-left-color: var(--sky);
+  }
+
+  .player-detail-name { color: #E8F4FF; }
+  .player-detail-meta { color: var(--muted-text); }
+
+  .btn-back {
+    border-color: rgba(74,173,232,0.2);
+    color: var(--muted-text);
+  }
+
+  .btn-back:hover {
+    background: rgba(74,173,232,0.1);
+    color: var(--sky-light);
+    border-color: rgba(74,173,232,0.3);
+  }
+
+  /* ── PEAK CARDS ────────────────────────────────────────────────────── */
+  .peak-card {
+    background: #142336;
+    border-color: rgba(74,173,232,0.12);
+  }
+
+  .peak-label  { color: var(--muted-text); }
+  .peak-value  { color: var(--sky-light); }
+  .peak-player { color: var(--muted-text); }
+
+  /* ── SYNC PANEL ────────────────────────────────────────────────────── */
+  #sync-panel {
+    background: #142336;
+    border-color: rgba(74,173,232,0.12);
+    border-left-color: var(--sky);
+  }
+
+  .sync-log-hdr { color: var(--muted-text); }
+  .log-line     { color: var(--muted-text); }
+  .log-line.ok  { color: #5DBF8A; }
+  .log-line.err { color: #E07070; }
+  .log-line.pending { color: var(--sky-light); }
+  #sync-summary { color: var(--muted-text); }
+
+  /* ── NOTION KEY INPUT ──────────────────────────────────────────────── */
+  .key-row input {
+    background: #0E1C2F;
+    border-color: rgba(74,173,232,0.2);
+    color: var(--body-text);
+  }
+
+  .key-row input:focus {
+    border-color: var(--sky);
+    box-shadow: 0 0 0 3px rgba(74,173,232,0.1);
+  }
+
+  /* ── MAPPER ────────────────────────────────────────────────────────── */
+  .mapper-grid select {
+    background: #0E1C2F;
+    border-color: rgba(74,173,232,0.2);
+    color: var(--body-text);
+  }
+
+  /* ── TREND CONTROLS ────────────────────────────────────────────────── */
+  .trend-controls select {
+    background: #142336;
+    border-color: rgba(74,173,232,0.2);
+    color: var(--body-text);
+  }
+
+  .trend-controls select:focus {
+    border-color: var(--sky);
+    box-shadow: 0 0 0 3px rgba(74,173,232,0.1);
+  }
+
+  /* ── SUMMARY TABLE ─────────────────────────────────────────────────── */
+  .summary-table th {
+    background: #0E1C2F;
+    color: var(--muted-text);
+    border-bottom-color: rgba(74,173,232,0.1);
+  }
+
+  .summary-table td {
+    color: var(--body-text);
+    border-bottom-color: rgba(74,173,232,0.06);
+  }
+
+  .summary-table tr:hover td { background: rgba(74,173,232,0.05); }
+
+  /* ── SCROLLBAR ─────────────────────────────────────────────────────── */
+  ::-webkit-scrollbar-track { background: #0E1C2F; }
+  ::-webkit-scrollbar-thumb { background: #1A2D43; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(74,173,232,0.4); }
+
+  /* ── NOTION HINT ───────────────────────────────────────────────────── */
+  #auto-sync-hint { color: #5DBF8A !important; }
+}
 </style>
 </head>
 <body>
@@ -138,12 +1094,12 @@ html{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
   <div class="brand"><div class="brand-dot"></div>Sporting Jax &middot; GPS Analytics</div>
   <div class="upload-title">Drop your session.<br><span>Sync to Notion instantly.</span></div>
   <div class="upload-sub">Upload any PlayerData CSV &mdash; charts appear immediately, then one click syncs everything to your Notion databases.</div>
-  <div class="drop-zone" id="dropzone">
+  <div class="drop-zone" id="dropzone" onclick="document.getElementById('file-input').click()">
     <div class="drop-icon">&#128194;</div>
     <div class="drop-label">Drag &amp; drop your CSV here</div>
+    <div class="drop-hint-click">or click anywhere to browse</div>
     <div class="drop-hint">PlayerData session export</div><div id="auto-sync-hint" style="margin-top:8px;font-size:11px;font-family:'DM Mono',monospace;color:#00e07a;display:none">Notion key saved ✓ — will auto-sync on upload</div>
-    <button class="drop-btn" onclick="document.getElementById('file-input').click()">Choose file</button>
-    <input type="file" id="file-input" accept=".csv,.txt">
+    <input type="file" id="file-input" accept=".csv,.txt" style="display:none">
   </div>
   <div class="supported">Auto-detects columns &nbsp;&middot;&nbsp;<span class="tag">Total Distance</span><span class="tag">HMLD</span><span class="tag">Low Sprint</span><span class="tag">High Sprint</span><span class="tag">RPE</span></div>
   <div class="error-banner" id="error-banner"></div>
@@ -161,10 +1117,10 @@ html{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
     </div>
     <div class="topbar-right">
       <button class="topbar-btn" onclick="newSession()">+ New session</button>
-      <button class="sync-btn" id="sync-btn" onclick="syncToNotion()"><div class="sync-dot"></div>Sync to Notion</button>
+      <button class="sync-btn" id="sync-btn" onclick="syncToNotion()"><div class="sync-dot"></div>Sync to Notion (all databases)</button>
     </div>
   </div>
-  <div id="key-banner" style="display:none;margin:0 24px 0;padding:12px 18px;background:#1a1e25;border:1px solid rgba(255,159,28,0.3);border-radius:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+  <div id="key-banner" style="display:none;margin:0 24px 0;padding:12px 18px;background:#1a1e25;border:1px solid rgba(240,120,48,0.3);border-radius:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <span style="font-family:'DM Mono',monospace;font-size:11px;color:#ff9f1c;text-transform:uppercase;letter-spacing:.08em">Notion key required</span>
     <input id="key-input" type="password" placeholder="Paste your Notion API key (ntn_...)" style="flex:1;min-width:200px;padding:7px 12px;border-radius:7px;border:1px solid rgba(255,255,255,0.12);background:#0d0f12;color:#e8eaed;font-family:'DM Mono',monospace;font-size:12px">
     <button onclick="saveKey()" style="padding:7px 16px;border-radius:7px;border:none;background:#00e07a;color:#000;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">Save</button>
@@ -302,6 +1258,8 @@ html{background:var(--bg);color:var(--text);font-family:var(--body);font-size:14
 const NOTION_KEY=localStorage.getItem("notion_key")||"";
 const SESSIONS_DB="1ed0c8a6f3c043a5aeb6540786ce95dd";
 const LOADS_DB="d2ae7f2baea74079b78726da2b294523";
+const PROFILES_DB="9041b56c1c1b44e099553b1d3f884410";
+const SESSIONS_CAL_DB="a986d58ed5744af7bdfb6b25b7857261";
 const NV="2022-06-28";
 const PROXY="https://corsproxy.io/?";
 let sessions=[],currentSession=null,sortCol="total",sortDir=-1,charts={};
@@ -337,74 +1295,300 @@ async function autoSyncAndRefreshTrends(){
 }
 
 async function syncToNotionSilent(){
-  if(!currentSession||currentSession.synced)return;
-  const key=localStorage.getItem("notion_key")||"";
-  if(!key)return;
-  const btn=document.getElementById("sync-btn");
-  const panel=document.getElementById("sync-panel");
-  const log=document.getElementById("sync-log");
-  const summary=document.getElementById("sync-summary");
-  panel.style.display="block";
-  log.innerHTML="";
-  summary.textContent="";
-  let ok=0,fail=0;
-  try{
-    addLog("Creating session...","pending");
-    const sb={parent:{database_id:SESSIONS_DB},properties:{"Session Name":{title:[{text:{content:currentSession.name}}]},"Session Type":{select:{name:guessType(currentSession.name)}}}};
-    if(currentSession.date)sb.properties["Date"]={date:{start:currentSession.date}};
-    await notionReq("pages","POST",sb);
-    addLog("Session: "+currentSession.name);ok++;
-    addLog("Syncing "+currentSession.players.length+" players...","pending");
-    for(const pl of currentSession.players){
-      try{
-        const props={"Entry":{title:[{text:{content:pl.name+" - "+currentSession.name}}]}};
-        if(pl.total!==null)props["Total Distance (m)"]={number:pl.total};
-        if(pl.hmld!==null)props["HMLD (m)"]={number:pl.hmld};
-        if(pl.lsprint!==null)props["Low Sprint (m)"]={number:pl.lsprint};
-        if(pl.hsprint!==null)props["High Sprint (m)"]={number:pl.hsprint};
-        if(pl.maxspeed!==null)props["Max Speed (km/h)"]={number:pl.maxspeed};
-        if(pl.rpe!==null)props["RPE"]={number:pl.rpe};
-        const lr=loadRating(pl,currentSession.players);
-        props["Load Rating"]={select:{name:lr.charAt(0).toUpperCase()+lr.slice(1)}};
-        await notionReq("pages","POST",{parent:{database_id:LOADS_DB},properties:props});
-        addLog(pl.name);ok++;
-      }catch(e){addLog(pl.name+": "+e.message,"err");fail++;}
+  // Auto-sync on CSV upload — runs full sync silently
+  const key=localStorage.getItem('notion_key')||'';
+  if(!key) return;
+  try { await syncToNotion(); } catch(e) { console.warn('Auto-sync failed:',e.message); }
+}
+
+
+// ─── HELPER: build visual bar ─────────────────────────────────────────────────
+function vizBar(val, maxVal=6500, width=20) {
+  if (val === null || val === undefined) return '—';
+  const filled = Math.round((Math.min(val, maxVal) / maxVal) * width);
+  return '█'.repeat(filled) + '░'.repeat(width - filled);
+}
+
+// ─── HELPER: load rating label ────────────────────────────────────────────────
+function loadLabel(lr) {
+  if (!lr) return '—';
+  const m = {'high':'High','normal':'Normal','low':'Low'};
+  return m[lr.toLowerCase()] || lr;
+}
+
+// ─── 1. PLAYER LOADS DB — add one row per player per session ──────────────────
+async function syncPlayerLoads(session) {
+  let ok=0, fail=0;
+  addLog('Syncing player loads (' + session.players.length + ' players)...','pending');
+  for (const pl of session.players) {
+    try {
+      const lr = loadRating(pl, session.players);
+      const props = {
+        "Entry": {title:[{text:{content: pl.name + ' — ' + session.name}}]},
+        "Load Rating": {select:{name: loadLabel(lr)}}
+      };
+      if (pl.total  !== null) props["Total Distance (m)"] = {number: pl.total};
+      if (pl.hmld   !== null) props["HMLD (m)"]           = {number: pl.hmld};
+      if (pl.lsprint!== null) props["Low Sprint (m)"]     = {number: pl.lsprint};
+      if (pl.hsprint!== null) props["High Sprint (m)"]    = {number: pl.hsprint};
+      if (pl.maxspeed!==null) props["Max Speed (km/h)"]   = {number: pl.maxspeed};
+      if (pl.rpe    !== null) props["RPE"]                = {number: pl.rpe};
+      await notionReq('pages','POST',{parent:{database_id:LOADS_DB},properties:props});
+      ok++;
+    } catch(e) { addLog(pl.name+': '+e.message,'err'); fail++; }
+  }
+  addLog('Player loads: '+ok+' synced'+(fail?' ('+fail+' failed)':''));
+  return {ok, fail};
+}
+
+// ─── 2. PLAYER PROFILES DB — update each player's latest-session row ──────────
+async function syncPlayerProfiles(session) {
+  addLog('Updating Player Profiles table...','pending');
+  // Query existing profiles to find page IDs by Player Name
+  let profilePages = {};
+  try {
+    const res = await notionReq('databases/'+PROFILES_DB+'/query','POST',{page_size:50});
+    for (const pg of res.results) {
+      const name = pg.properties['Player Name']?.title?.[0]?.plain_text || '';
+      if (name) profilePages[name] = pg.id;
     }
+  } catch(e) { addLog('Could not query Player Profiles: '+e.message,'err'); return; }
+
+  const squadAvgTotal = session.players.filter(p=>p.total!==null).reduce((s,p)=>s+p.total,0) /
+                        (session.players.filter(p=>p.total!==null).length || 1);
+
+  for (const pl of session.players) {
+    const lr = loadLabel(loadRating(pl, session.players));
+    const props = {
+      "Status":       {select:{name: pl.total===null&&pl.rpe===null ? 'DNT' : 'Available'}},
+      "Last Session": {rich_text:[{text:{content: session.name + (session.date?' · '+session.date:'')}}]},
+      "Load Rating":  {select:{name: lr}},
+      "Sessions Played": {number: 1}  // incremented below if found
+    };
+    if (pl.total  !==null) props["Total Distance (m)"] = {number: pl.total};
+    if (pl.hmld   !==null) props["HMLD (m)"]           = {number: pl.hmld};
+    if (pl.hsprint!==null) props["High Sprint (m)"]    = {number: pl.hsprint};
+    if (pl.lsprint!==null) props["Low Sprint (m)"]     = {number: pl.lsprint};
+    if (pl.rpe    !==null) props["RPE"]                = {number: pl.rpe};
+
+    try {
+      if (profilePages[pl.name]) {
+        // Update existing row
+        await notionReq('pages/'+profilePages[pl.name],'PATCH',{properties:props});
+      } else {
+        // Create new row
+        props["Player Name"] = {title:[{text:{content: pl.name}}]};
+        await notionReq('pages','POST',{parent:{database_id:PROFILES_DB},properties:props});
+      }
+    } catch(e) { addLog('Profile '+pl.name+': '+e.message,'err'); }
+  }
+  addLog('Player Profiles table updated');
+}
+
+// ─── 3. SESSIONS CALENDAR DB — create a dated page with team averages ─────────
+async function syncSessionCalendar(session) {
+  addLog('Creating session calendar entry...','pending');
+  const ps = session.players.filter(p=>p.total!==null);
+  const avgTotal  = ps.length ? Math.round(ps.reduce((s,p)=>s+p.total,0)/ps.length) : 0;
+  const avgHMLD   = ps.filter(p=>p.hmld!==null).length ? Math.round(ps.filter(p=>p.hmld!==null).reduce((s,p)=>s+p.hmld,0)/ps.filter(p=>p.hmld!==null).length) : null;
+  const avgHSpr   = ps.filter(p=>p.hsprint!==null).length ? Math.round(ps.filter(p=>p.hsprint!==null).reduce((s,p)=>s+p.hsprint,0)/ps.filter(p=>p.hsprint!==null).length) : null;
+  const avgLSpr   = ps.filter(p=>p.lsprint!==null).length ? Math.round(ps.filter(p=>p.lsprint!==null).reduce((s,p)=>s+p.lsprint,0)/ps.filter(p=>p.lsprint!==null).length) : null;
+  const avgRPE    = session.players.filter(p=>p.rpe!==null).length ? (session.players.filter(p=>p.rpe!==null).reduce((s,p)=>s+p.rpe,0)/session.players.filter(p=>p.rpe!==null).length).toFixed(1) : null;
+
+  const top5dist  = [...ps].sort((a,b)=>b.total-a.total).slice(0,5);
+  const top5hmld  = [...ps].filter(p=>p.hmld!==null).sort((a,b)=>b.hmld-a.hmld).slice(0,5);
+  const top5hs    = [...ps].filter(p=>p.hsprint!==null&&p.hsprint>0).sort((a,b)=>b.hsprint-a.hsprint).slice(0,5);
+  const top5ls    = [...ps].filter(p=>p.lsprint!==null).sort((a,b)=>b.lsprint-a.lsprint).slice(0,5);
+  const top5rpe   = [...session.players].filter(p=>p.rpe!==null).sort((a,b)=>b.rpe-a.rpe).slice(0,5);
+  const lowLoad   = session.players.filter(p=>loadRating(p,session.players)==='low');
+
+  const fmt = (arr, key) => arr.map((p,i)=>`| ${i+1} | ${p.name} | ${p[key]!==null?Math.round(p[key]).toLocaleString():p.rpe} |`).join('\n');
+
+  const content = `## Daily team averages
+
+| Metric | Squad avg | Highest | Lowest |
+|---|---|---|---|
+| Total Distance (m) | **${avgTotal.toLocaleString()}** | ${top5dist[0]?top5dist[0].name+' — '+Math.round(top5dist[0].total).toLocaleString():'—'} | ${ps.length?[...ps].sort((a,b)=>a.total-b.total)[0].name+' — '+Math.round([...ps].sort((a,b)=>a.total-b.total)[0].total).toLocaleString():'—'} |
+| HMLD (m) | ${avgHMLD!==null?'**'+avgHMLD.toLocaleString()+'**':'—'} | ${top5hmld[0]?top5hmld[0].name+' — '+Math.round(top5hmld[0].hmld).toLocaleString():'—'} | — |
+| High Sprint (m) | ${avgHSpr!==null?'**'+avgHSpr+'**':'—'} | ${top5hs[0]?top5hs[0].name+' — '+top5hs[0].hsprint:'—'} | — |
+| Low Sprint (m) | ${avgLSpr!==null?'**'+avgLSpr+'**':'—'} | ${top5ls[0]?top5ls[0].name+' — '+Math.round(top5ls[0].lsprint).toLocaleString():'—'} | — |
+| RPE | ${avgRPE!==null?'**'+avgRPE+'**':'—'} | ${top5rpe[0]?top5rpe[0].name+' — '+top5rpe[0].rpe:'—'} | — |
+
+---
+
+## Top 5 — Total Distance
+
+| # | Player | m |
+|---|---|---|
+${fmt(top5dist,'total')}
+
+## Top 5 — HMLD
+
+| # | Player | m |
+|---|---|---|
+${fmt(top5hmld,'hmld')}
+
+## Top 5 — High Sprint
+
+| # | Player | m |
+|---|---|---|
+${top5hs.length ? fmt(top5hs,'hsprint') : '| — | No sprint data | — |'}
+
+## Top 5 — Low Sprint
+
+| # | Player | m |
+|---|---|---|
+${fmt(top5ls,'lsprint')}
+
+## Top 5 — RPE
+
+| # | Player | Score |
+|---|---|---|
+${fmt(top5rpe,'rpe')}
+
+---
+
+## Low load flagged
+
+${lowLoad.length ? '| Player | Total Dist | Note |\n|---|---|---|\n'+lowLoad.map(p=>`| ${p.name} | ${p.total!==null?Math.round(p.total).toLocaleString()+' m':'—'} | Below squad avg |`).join('\n') : '> No flagged players this session.'}
+
+---
+
+## Session notes
+
+> Add coaching or physio observations here.`;
+
+  try {
+    const props = {
+      "Session Name": {title:[{text:{content: session.name}}]},
+      "Session Type": {select:{name: guessType(session.name)}}
+    };
+    if (session.date) props["Date"] = {date:{start: session.date}};
+    await notionReq('pages','POST',{
+      parent:{database_id:SESSIONS_CAL_DB},
+      properties:props,
+      children:[{
+        object:'block', type:'paragraph',
+        paragraph:{rich_text:[{type:'text',text:{content:content}}]}
+      }]
+    });
+    addLog('Session calendar page created');
+  } catch(e) { addLog('Session calendar: '+e.message,'err'); }
+}
+
+// ─── 4. INDIVIDUAL PLAYER PAGES — append new session section ─────────────────
+async function syncIndividualPlayerPages(session) {
+  addLog('Updating individual player pages...','pending');
+  let ok=0;
+  for (const pl of session.players) {
+    const pageId = PLAYER_PAGES[pl.name];
+    if (!pageId) continue;
+    const lr = loadLabel(loadRating(pl, session.players));
+    const bar = pl.total!==null ? vizBar(pl.total) : '—';
+    const rows = [
+      ['Date', session.date || session.name],
+      ['Total Distance (m)', pl.total!==null ? Math.round(pl.total).toLocaleString()+' m  '+bar : '—'],
+      ['HMLD (m)', pl.hmld!==null ? Math.round(pl.hmld).toLocaleString() : '—'],
+      ['High Sprint (m)', pl.hsprint!==null ? Math.round(pl.hsprint).toLocaleString() : '—'],
+      ['Low Sprint (m)', pl.lsprint!==null ? Math.round(pl.lsprint).toLocaleString() : '—'],
+      ['Max Speed (km/h)', pl.maxspeed!==null ? pl.maxspeed.toFixed(1) : '—'],
+      ['RPE', pl.rpe!==null ? String(pl.rpe) : '—'],
+      ['Load Rating', lr],
+    ];
+    const tableChildren = rows.map(([metric, value]) => ({
+      object:'block', type:'table_row',
+      table_row:{cells:[[{type:'text',text:{content:metric}}],[{type:'text',text:{content:String(value)}}]]}
+    }));
+    try {
+      await notionReq('blocks/'+pageId+'/children','PATCH',{children:[
+        {object:'block',type:'divider',divider:{}},
+        {object:'block',type:'heading_3',heading_3:{rich_text:[{type:'text',text:{content:'Session: '+session.name+(session.date?' · '+session.date:'')}}]}},
+        {object:'block',type:'table',table:{table_width:2,has_column_header:true,has_row_header:false,children:[
+          {object:'block',type:'table_row',table_row:{cells:[[{type:'text',text:{content:'Metric'}}],[{type:'text',text:{content:'Value'}}]]}},
+          ...tableChildren
+        ]}}
+      ]});
+      ok++;
+    } catch(e) { addLog('Page '+pl.name+': '+e.message,'err'); }
+  }
+  addLog('Individual pages updated: '+ok+'/'+session.players.length);
+}
+
+// ─── 5. SESSIONS DB (original) — create session record ───────────────────────
+async function syncOriginalSessionsDB(session) {
+  addLog('Creating Sessions DB entry...','pending');
+  try {
+    const props = {"Session Name":{title:[{text:{content:session.name}}]},"Session Type":{select:{name:guessType(session.name)}}};
+    if (session.date) props["Date"]={date:{start:session.date}};
+    await notionReq('pages','POST',{parent:{database_id:SESSIONS_DB},properties:props});
+    addLog('Sessions DB: entry created');
+  } catch(e) { addLog('Sessions DB: '+e.message,'err'); }
+}
+
+// ─── MASTER SYNC — runs all 5 syncs in sequence ───────────────────────────────
+async function syncToNotion() {
+  if (!currentSession) return;
+  const btn=document.getElementById('sync-btn'),
+        panel=document.getElementById('sync-panel'),
+        log=document.getElementById('sync-log'),
+        summary=document.getElementById('sync-summary');
+  btn.className='sync-btn syncing';
+  btn.innerHTML="<div class='sync-dot'></div>Syncing...";
+  btn.disabled=true;
+  panel.style.display='block';
+  log.innerHTML='';
+  summary.textContent='';
+
+  const key=localStorage.getItem('notion_key')||'';
+  if(!key){
+    addLog('No Notion key — enter key in settings first','err');
+    btn.className='sync-btn'; btn.innerHTML="<div class='sync-dot'></div>Sync to Notion"; btn.disabled=false;
+    return;
+  }
+
+  addLog('Starting full sync...','pending');
+  const t0=Date.now();
+  try {
+    await syncOriginalSessionsDB(currentSession);
+    await syncPlayerLoads(currentSession);
+    await syncPlayerProfiles(currentSession);
+    await syncSessionCalendar(currentSession);
+    await syncIndividualPlayerPages(currentSession);
+    await loadTrendsFromNotion();
+
+    const elapsed=((Date.now()-t0)/1000).toFixed(1);
     currentSession.synced=true;
-    btn.className="sync-btn synced";
+    btn.className='sync-btn synced';
     btn.innerHTML="<div class='sync-dot'></div>Synced";
     btn.disabled=true;
-    const now=new Date();summary.textContent=ok+" records synced to Notion"+(fail?" - "+fail+" failed":"")+". Last synced: "+now.toLocaleTimeString();
-  }catch(e){
-    addLog("Failed: "+e.message,"err");
-    btn.className="sync-btn";
-    btn.innerHTML="<div class='sync-dot'></div>Retry sync";
-    btn.disabled=false;
-    summary.textContent="Auto-sync failed - click Retry sync manually.";
+    summary.textContent='All 5 databases synced in '+elapsed+'s — '+new Date().toLocaleTimeString();
+  } catch(e) {
+    addLog('Sync failed: '+e.message,'err');
+    btn.className='sync-btn'; btn.innerHTML="<div class='sync-dot'></div>Retry sync"; btn.disabled=false;
+    summary.textContent='Sync failed — check your Notion integration key and retry.';
   }
 }
 
-async function syncToNotion(){if(!currentSession)return;const btn=document.getElementById("sync-btn"),panel=document.getElementById("sync-panel"),log=document.getElementById("sync-log"),summary=document.getElementById("sync-summary");btn.className="sync-btn syncing";btn.innerHTML="<div class='sync-dot'></div>Syncing...";btn.disabled=true;panel.style.display="block";log.innerHTML="";summary.textContent="";let ok=0,fail=0;try{addLog("Creating session record...","pending");const sb={parent:{database_id:SESSIONS_DB},properties:{"Session Name":{title:[{text:{content:currentSession.name}}]},"Session Type":{select:{name:guessType(currentSession.name)}}}};if(currentSession.date)sb.properties["Date"]={date:{start:currentSession.date}};await notionReq("pages","POST",sb);addLog("Session: "+currentSession.name);ok++;addLog("Syncing "+currentSession.players.length+" players...","pending");for(const pl of currentSession.players){try{const props={"Entry":{title:[{text:{content:pl.name+" - "+currentSession.name}}]}};if(pl.total!==null)props["Total Distance (m)"]={number:pl.total};if(pl.hmld!==null)props["HMLD (m)"]={number:pl.hmld};if(pl.lsprint!==null)props["Low Sprint (m)"]={number:pl.lsprint};if(pl.hsprint!==null)props["High Sprint (m)"]={number:pl.hsprint};if(pl.maxspeed!==null)props["Max Speed (km/h)"]={number:pl.maxspeed};if(pl.rpe!==null)props["RPE"]={number:pl.rpe};const lr=loadRating(pl,currentSession.players);props["Load Rating"]={select:{name:lr.charAt(0).toUpperCase()+lr.slice(1)}};await notionReq("pages","POST",{parent:{database_id:LOADS_DB},properties:props});addLog(pl.name);ok++;}catch(e){addLog(pl.name+": "+e.message,"err");fail++;}}currentSession.synced=true;btn.className="sync-btn synced";btn.innerHTML="<div class='sync-dot'></div>Synced";btn.disabled=true;summary.textContent=ok+" records synced"+(fail?" - "+fail+" failed":"");await loadTrendsFromNotion();}catch(e){addLog("Failed: "+e.message,"err");btn.className="sync-btn";btn.innerHTML="<div class='sync-dot'></div>Retry sync";btn.disabled=false;summary.textContent="Sync failed - check your Notion integration and retry.";}}
 function showTab(tab){document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",["team","players","compare"][i]===tab));document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active"));document.getElementById("tab-"+tab).classList.add("active");document.getElementById("player-table").style.display="";document.getElementById("player-detail").style.display="none";if(tab==="team")renderTeam();if(tab==="players")renderPlayerTable();if(tab==="compare")renderCompare();if(tab==="trends"){if(trendsData.length===0){loadTrendsFromNotion();}else{renderTrends();}}}
 function avg(arr,key){const v=arr.map(p=>p[key]).filter(v=>v!==null&&!isNaN(v));return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
 function has(key){return currentSession.players.some(p=>p[key]!==null&&p[key]>0);}
 function fmt(v,d=0){return v!==null&&!isNaN(v)?v.toFixed(d):"--";}
 function fmtK(v){return v!==null&&!isNaN(v)?Math.round(v).toLocaleString():"--";}
-function rpeColor(v){return v<=3?"#00e07a":v<=6?"#ff9f1c":"#ff4d4d";}
+function rpeColor(v){return v<=3?"#4AADE8":v<=6?"#F07830":"#E05050";}
 function rpeLabel(v){return v<=3?"Easy":v<=5?"Moderate":v<=7?"Hard":"Very hard";}
 function loadRating(player,players){const a=avg(players,"total");if(!a)return"normal";const r=player.total/a;return r>=1.1?"high":r>=0.85?"normal":"low";}
 function destroyAllCharts(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};}
 function destroyChart(id){if(charts[id]){try{charts[id].destroy()}catch(e){}delete charts[id];}}
 const GC={color:"#e8eaed",grid:"rgba(255,255,255,0.05)"};
-function renderTeam(){const p=currentSession.players;const aT=avg(p,"total"),aH=avg(p,"hmld"),aL=avg(p,"lsprint"),aS=avg(p,"hsprint"),aR=avg(p,"rpe");document.getElementById("team-metrics").innerHTML=`<div class="metric-card"><div class="metric-lbl">Avg total distance</div><div class="metric-val">${aT?Math.round(aT/100)/10+"k":"--"}</div><div class="metric-unit">metres</div></div><div class="metric-card info"><div class="metric-lbl">Avg HMLD</div><div class="metric-val">${fmtK(aH)}</div><div class="metric-unit">metres</div></div><div class="metric-card warn"><div class="metric-lbl">Avg low sprint</div><div class="metric-val">${fmtK(aL)}</div><div class="metric-unit">metres</div></div><div class="metric-card danger"><div class="metric-lbl">Avg high sprint</div><div class="metric-val">${fmtK(aS)}</div><div class="metric-unit">metres</div></div><div class="metric-card" style="--accent:${aR?rpeColor(aR):"var(--muted)"}"><div class="metric-lbl">Squad avg RPE</div><div class="metric-val" style="color:${aR?rpeColor(aR):"var(--muted)"}">${aR?aR.toFixed(1):"--"}</div><div class="metric-unit">${aR?rpeLabel(aR):"not recorded"}</div></div>`;const sorted=[...p].sort((a,b)=>b.total-a.total);const labels=sorted.map(x=>x.name.split(" ").slice(-1)[0]);destroyChart("teamDistChart");const ds=[{label:"Total",data:sorted.map(x=>x.total),backgroundColor:"rgba(0,224,122,0.7)",borderRadius:3}];if(has("hmld"))ds.push({label:"HMLD",data:sorted.map(x=>x.hmld||0),backgroundColor:"rgba(0,136,255,0.7)",borderRadius:3});if(has("lsprint"))ds.push({label:"Low sprint",data:sorted.map(x=>x.lsprint||0),backgroundColor:"rgba(255,159,28,0.7)",borderRadius:3});if(has("hsprint"))ds.push({label:"High sprint",data:sorted.map(x=>x.hsprint||0),backgroundColor:"rgba(255,77,77,0.7)",borderRadius:3});charts["teamDistChart"]=new Chart(document.getElementById("teamDistChart"),{type:"bar",data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:GC.color,font:{size:10},autoSkip:false,maxRotation:40},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:10}},grid:{color:GC.grid}}}}});const sc=document.getElementById("sprint-card");if(has("lsprint")||has("hsprint")){sc.style.display="";document.getElementById("sprint-chart-wrap").style.height=Math.max(200,p.length*28+60)+"px";const spDS=[];if(has("lsprint"))spDS.push({label:"Low sprint",data:sorted.map(x=>x.lsprint||0),backgroundColor:"rgba(255,159,28,0.75)",borderRadius:3});if(has("hsprint"))spDS.push({label:"High sprint",data:sorted.map(x=>x.hsprint||0),backgroundColor:"rgba(255,77,77,0.75)",borderRadius:3});destroyChart("sprintChart");charts["sprintChart"]=new Chart(document.getElementById("sprintChart"),{type:"bar",indexAxis:"y",data:{labels,datasets:spDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{sc.style.display="none";}if(has("rpe")){document.getElementById("rpe-chart-wrap").style.display="";document.getElementById("rpe-manual").style.display="none";document.getElementById("rpe-chart-inner").style.height=Math.max(180,p.length*26+60)+"px";const rs=[...p].filter(x=>x.rpe!==null).sort((a,b)=>a.rpe-b.rpe);destroyChart("rpeChart");charts["rpeChart"]=new Chart(document.getElementById("rpeChart"),{type:"bar",indexAxis:"y",data:{labels:rs.map(x=>x.name.split(" ").slice(-1)[0]),datasets:[{data:rs.map(x=>x.rpe),backgroundColor:rs.map(x=>rpeColor(x.rpe)),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:10,ticks:{stepSize:1,color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{document.getElementById("rpe-chart-wrap").style.display="none";document.getElementById("rpe-manual").style.display="";const grid=document.getElementById("rpe-grid");grid.innerHTML="";p.forEach((pl,i)=>{const row=document.createElement("div");row.className="rpe-player-row";row.innerHTML=`<div class="rpe-player-name">${pl.name}</div><div class="rpe-btns">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="rpe-btn" id="rpe_${i}_${n}" onclick="setRPE(${i},${n})">${n}</button>`).join("")}</div>`;grid.appendChild(row);});}}
+function renderTeam(){const p=currentSession.players;const aT=avg(p,"total"),aH=avg(p,"hmld"),aL=avg(p,"lsprint"),aS=avg(p,"hsprint"),aR=avg(p,"rpe");document.getElementById("team-metrics").innerHTML=`<div class="metric-card"><div class="metric-lbl">Avg total distance</div><div class="metric-val">${aT?Math.round(aT/100)/10+"k":"--"}</div><div class="metric-unit">metres</div></div><div class="metric-card info"><div class="metric-lbl">Avg HMLD</div><div class="metric-val">${fmtK(aH)}</div><div class="metric-unit">metres</div></div><div class="metric-card warn"><div class="metric-lbl">Avg low sprint</div><div class="metric-val">${fmtK(aL)}</div><div class="metric-unit">metres</div></div><div class="metric-card danger"><div class="metric-lbl">Avg high sprint</div><div class="metric-val">${fmtK(aS)}</div><div class="metric-unit">metres</div></div><div class="metric-card" style="--accent:${aR?rpeColor(aR):"var(--muted)"}"><div class="metric-lbl">Squad avg RPE</div><div class="metric-val" style="color:${aR?rpeColor(aR):"var(--muted)"}">${aR?aR.toFixed(1):"--"}</div><div class="metric-unit">${aR?rpeLabel(aR):"not recorded"}</div></div>`;const sorted=[...p].sort((a,b)=>b.total-a.total);const labels=sorted.map(x=>x.name.split(" ").slice(-1)[0]);destroyChart("teamDistChart");const ds=[{label:"Total",data:sorted.map(x=>x.total),backgroundColor:"rgba(74,173,232,0.7)",borderRadius:3}];if(has("hmld"))ds.push({label:"HMLD",data:sorted.map(x=>x.hmld||0),backgroundColor:"rgba(74,173,232,0.4,0.7)",borderRadius:3});if(has("lsprint"))ds.push({label:"Low sprint",data:sorted.map(x=>x.lsprint||0),backgroundColor:"rgba(240,120,48,0.7)",borderRadius:3});if(has("hsprint"))ds.push({label:"High sprint",data:sorted.map(x=>x.hsprint||0),backgroundColor:"rgba(255,77,77,0.7)",borderRadius:3});charts["teamDistChart"]=new Chart(document.getElementById("teamDistChart"),{type:"bar",data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:GC.color,font:{size:10},autoSkip:false,maxRotation:40},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:10}},grid:{color:GC.grid}}}}});const sc=document.getElementById("sprint-card");if(has("lsprint")||has("hsprint")){sc.style.display="";document.getElementById("sprint-chart-wrap").style.height=Math.max(200,p.length*28+60)+"px";const spDS=[];if(has("lsprint"))spDS.push({label:"Low sprint",data:sorted.map(x=>x.lsprint||0),backgroundColor:"rgba(240,120,48,0.75)",borderRadius:3});if(has("hsprint"))spDS.push({label:"High sprint",data:sorted.map(x=>x.hsprint||0),backgroundColor:"rgba(255,77,77,0.75)",borderRadius:3});destroyChart("sprintChart");charts["sprintChart"]=new Chart(document.getElementById("sprintChart"),{type:"bar",indexAxis:"y",data:{labels,datasets:spDS},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{sc.style.display="none";}if(has("rpe")){document.getElementById("rpe-chart-wrap").style.display="";document.getElementById("rpe-manual").style.display="none";document.getElementById("rpe-chart-inner").style.height=Math.max(180,p.length*26+60)+"px";const rs=[...p].filter(x=>x.rpe!==null).sort((a,b)=>a.rpe-b.rpe);destroyChart("rpeChart");charts["rpeChart"]=new Chart(document.getElementById("rpeChart"),{type:"bar",indexAxis:"y",data:{labels:rs.map(x=>x.name.split(" ").slice(-1)[0]),datasets:[{data:rs.map(x=>x.rpe),backgroundColor:rs.map(x=>rpeColor(x.rpe)),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:10,ticks:{stepSize:1,color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{document.getElementById("rpe-chart-wrap").style.display="none";document.getElementById("rpe-manual").style.display="";const grid=document.getElementById("rpe-grid");grid.innerHTML="";p.forEach((pl,i)=>{const row=document.createElement("div");row.className="rpe-player-row";row.innerHTML=`<div class="rpe-player-name">${pl.name}</div><div class="rpe-btns">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="rpe-btn" id="rpe_${i}_${n}" onclick="setRPE(${i},${n})">${n}</button>`).join("")}</div>`;grid.appendChild(row);});}}
 function setRPE(idx,val){currentSession.players[idx].rpe=val;for(let n=1;n<=10;n++){const b=document.getElementById(`rpe_${idx}_${n}`);if(b)b.classList.toggle("active",n<=val);}}
 function renderPlayerTable(){const p=[...currentSession.players];p.sort((a,b)=>{const av=a[sortCol],bv=b[sortCol];if(av===null&&bv===null)return 0;if(av===null)return 1;if(bv===null)return -1;if(typeof av==="string")return sortDir*av.localeCompare(bv);return sortDir*(bv-av);});const maxT=Math.max(...p.map(x=>x.total));document.getElementById("player-tbody").innerHTML=p.map(pl=>{const lr=loadRating(pl,currentSession.players);const pc=lr==="high"?"pill-high":lr==="low"?"pill-low":"pill-normal";const rc=pl.rpe?`background:${rpeColor(pl.rpe)}22;color:${rpeColor(pl.rpe)}`:"color:var(--muted)";return`<tr class="clickable" onclick="showPlayerDetail('${pl.name.replace(/'/g,"\'")}')"><td style="font-weight:500">${pl.name}</td><td><div class="bar-wrap"><span>${fmtK(pl.total)}</span><div class="bar-bg"><div class="bar-fill" style="width:${Math.round(pl.total/maxT*100)}%"></div></div></div></td><td>${fmtK(pl.hmld)}</td><td>${fmtK(pl.lsprint)}</td><td>${fmtK(pl.hsprint)}</td><td>${fmt(pl.maxspeed,1)}</td><td><span class="rpe-num" style="${rc}">${pl.rpe!==null?pl.rpe:"--"}</span></td><td><span class="load-pill ${pc}">${lr.charAt(0).toUpperCase()+lr.slice(1)}</span></td></tr>`;}).join("");}
 function sortBy(col){if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=-1;}renderPlayerTable();}
-function showPlayerDetail(name){const player=currentSession.players.find(p=>p.name===name);if(!player)return;document.getElementById("player-table").style.display="none";document.getElementById("player-detail").style.display="block";const initials=name.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);const p=currentSession.players;const lr=loadRating(player,p);const pc=lr==="high"?"pill-high":lr==="low"?"pill-low":"pill-normal";document.getElementById("player-header").innerHTML=`<div class="player-avatar">${initials}</div><div><div class="player-info-name">${player.name}</div><div class="player-info-sub">${currentSession.name} <span class="load-pill ${pc}">${lr.charAt(0).toUpperCase()+lr.slice(1)} load</span></div></div>${player.rpe!==null?`<div class="player-rpe-badge"><div class="player-rpe-val" style="color:${rpeColor(player.rpe)}">${player.rpe}</div><div class="player-rpe-lbl">RPE - ${rpeLabel(player.rpe)}</div></div>`:""}`;document.getElementById("detail-stats").innerHTML=[{v:fmtK(player.total),l:"Total distance",u:"m"},{v:fmtK(player.hmld),l:"HMLD",u:"m"},{v:fmtK(player.lsprint),l:"Low sprint",u:"m"},{v:fmtK(player.hsprint),l:"High sprint",u:"m"},{v:fmt(player.maxspeed,1),l:"Max speed",u:"km/h"}].map(s=>`<div class="detail-stat"><div class="detail-stat-val">${s.v}</div><div class="detail-stat-lbl">${s.l}<br><span style="color:var(--muted)">${s.u}</span></div></div>`).join("");destroyChart("playerVsChart");destroyChart("rpeDistChart");const ml=["Total dist"],pv=[player.total],av=[avg(p,"total")];if(has("hmld")){ml.push("HMLD");pv.push(player.hmld);av.push(avg(p,"hmld"));}if(has("lsprint")){ml.push("Low sprint");pv.push(player.lsprint);av.push(avg(p,"lsprint"));}if(has("hsprint")){ml.push("High sprint");pv.push(player.hsprint);av.push(avg(p,"hsprint"));}setTimeout(()=>{charts["playerVsChart"]=new Chart(document.getElementById("playerVsChart"),{type:"bar",data:{labels:ml,datasets:[{label:player.name.split(" ")[0],data:pv,backgroundColor:"rgba(0,224,122,0.7)",borderRadius:4},{label:"Squad avg",data:av,backgroundColor:"rgba(255,255,255,0.1)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:GC.color,font:{size:11}}}},scales:{x:{ticks:{color:GC.color,font:{size:11}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:11}},grid:{color:GC.grid}}}}});const rc=document.getElementById("rpe-dist-card");if(has("rpe")&&player.rpe!==null){rc.style.display="";const rs=[...p].filter(x=>x.rpe!==null).sort((a,b)=>a.rpe-b.rpe);charts["rpeDistChart"]=new Chart(document.getElementById("rpeDistChart"),{type:"bar",indexAxis:"y",data:{labels:rs.map(x=>x.name.split(" ").slice(-1)[0]),datasets:[{data:rs.map(x=>x.rpe),backgroundColor:rs.map(x=>x.name===player.name?rpeColor(x.rpe):"rgba(255,255,255,0.1)"),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:10,ticks:{stepSize:1,color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{rc.style.display="none";}},50);}
+function showPlayerDetail(name){const player=currentSession.players.find(p=>p.name===name);if(!player)return;document.getElementById("player-table").style.display="none";document.getElementById("player-detail").style.display="block";const initials=name.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);const p=currentSession.players;const lr=loadRating(player,p);const pc=lr==="high"?"pill-high":lr==="low"?"pill-low":"pill-normal";document.getElementById("player-header").innerHTML=`<div class="player-avatar">${initials}</div><div><div class="player-info-name">${player.name}</div><div class="player-info-sub">${currentSession.name} <span class="load-pill ${pc}">${lr.charAt(0).toUpperCase()+lr.slice(1)} load</span></div></div>${player.rpe!==null?`<div class="player-rpe-badge"><div class="player-rpe-val" style="color:${rpeColor(player.rpe)}">${player.rpe}</div><div class="player-rpe-lbl">RPE - ${rpeLabel(player.rpe)}</div></div>`:""}`;document.getElementById("detail-stats").innerHTML=[{v:fmtK(player.total),l:"Total distance",u:"m"},{v:fmtK(player.hmld),l:"HMLD",u:"m"},{v:fmtK(player.lsprint),l:"Low sprint",u:"m"},{v:fmtK(player.hsprint),l:"High sprint",u:"m"},{v:fmt(player.maxspeed,1),l:"Max speed",u:"km/h"}].map(s=>`<div class="detail-stat"><div class="detail-stat-val">${s.v}</div><div class="detail-stat-lbl">${s.l}<br><span style="color:var(--muted)">${s.u}</span></div></div>`).join("");destroyChart("playerVsChart");destroyChart("rpeDistChart");const ml=["Total dist"],pv=[player.total],av=[avg(p,"total")];if(has("hmld")){ml.push("HMLD");pv.push(player.hmld);av.push(avg(p,"hmld"));}if(has("lsprint")){ml.push("Low sprint");pv.push(player.lsprint);av.push(avg(p,"lsprint"));}if(has("hsprint")){ml.push("High sprint");pv.push(player.hsprint);av.push(avg(p,"hsprint"));}setTimeout(()=>{charts["playerVsChart"]=new Chart(document.getElementById("playerVsChart"),{type:"bar",data:{labels:ml,datasets:[{label:player.name.split(" ")[0],data:pv,backgroundColor:"rgba(74,173,232,0.7)",borderRadius:4},{label:"Squad avg",data:av,backgroundColor:"rgba(255,255,255,0.1)",borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:GC.color,font:{size:11}}}},scales:{x:{ticks:{color:GC.color,font:{size:11}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:11}},grid:{color:GC.grid}}}}});const rc=document.getElementById("rpe-dist-card");if(has("rpe")&&player.rpe!==null){rc.style.display="";const rs=[...p].filter(x=>x.rpe!==null).sort((a,b)=>a.rpe-b.rpe);charts["rpeDistChart"]=new Chart(document.getElementById("rpeDistChart"),{type:"bar",indexAxis:"y",data:{labels:rs.map(x=>x.name.split(" ").slice(-1)[0]),datasets:[{data:rs.map(x=>x.rpe),backgroundColor:rs.map(x=>x.name===player.name?rpeColor(x.rpe):"rgba(255,255,255,0.1)"),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{min:0,max:10,ticks:{stepSize:1,color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{rc.style.display="none";}},50);}
 function closeDetail(){document.getElementById("player-table").style.display="";document.getElementById("player-detail").style.display="none";destroyChart("playerVsChart");destroyChart("rpeDistChart");}
 function renderCompare(){if(sessions.length<2){document.getElementById("compare-upload").style.display="";return;}document.getElementById("compare-upload").style.display="none";renderCompareCharts();}
 function handleCmpFile(file){const r=new FileReader();r.onload=e=>{const{headers,rows}=parseCSV(e.target.result);const mapped={};for(const f of Object.keys(FIELDS)){const found=detectCol(headers,f);if(found)mapped[f]=found;}if(!mapped.name||!mapped.total){alert("Could not auto-detect columns.");return;}const players=rows.map(r=>({name:r[mapped.name]?.trim()||"Unknown",total:parseNum(r[mapped.total]),hmld:mapped.hmld?parseNum(r[mapped.hmld]):null,lsprint:mapped.lsprint?parseNum(r[mapped.lsprint]):null,hsprint:mapped.hsprint?parseNum(r[mapped.hsprint]):null,rpe:mapped.rpe?parseNum(r[mapped.rpe]):null})).filter(p=>p.total>0);sessions.push({name:file.name.replace(/\.(csv|txt)$/i,""),players,synced:false});renderCompareCharts();};r.readAsText(file);}
-function renderCompareCharts(){const s1=sessions[sessions.length-2],s2=sessions[sessions.length-1];const allNames=[...new Set([...s1.players.map(p=>p.name),...s2.players.map(p=>p.name)])];const labels=allNames.map(n=>n.split(" ").slice(-1)[0]);const get=(sess,name,key)=>{const p=sess.players.find(x=>x.name===name);return(p&&p[key]!==null)?p[key]:0;};const h=Math.max(200,allNames.length*32+80);["cmpTotal","cmpHMLD","cmpSprint","cmpRPE"].forEach(id=>destroyChart(id));document.getElementById("compare-charts").innerHTML=`<div class="chart-row cols-1"><div class="chart-card"><div class="chart-head"><div class="chart-title">Total distance</div><div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#00e07a"></div>${s1.name}</div><div class="leg-item"><div class="leg-dot" style="background:#0088ff"></div>${s2.name}</div></div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpTotal"></canvas></div></div></div><div class="chart-row cols-2"><div class="chart-card"><div class="chart-head"><div class="chart-title">HMLD</div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpHMLD"></canvas></div></div><div class="chart-card"><div class="chart-head"><div class="chart-title">Sprint zones</div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpSprint"></canvas></div></div></div><div class="chart-row cols-1" id="cmp-rpe-row"><div class="chart-card"><div class="chart-head"><div class="chart-title">RPE comparison</div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpRPE"></canvas></div></div></div>`;const bo={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}};setTimeout(()=>{charts["cmpTotal"]=new Chart(document.getElementById("cmpTotal"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:s1.name,data:allNames.map(n=>get(s1,n,"total")),backgroundColor:"rgba(0,224,122,0.7)",borderRadius:3},{label:s2.name,data:allNames.map(n=>get(s2,n,"total")),backgroundColor:"rgba(0,136,255,0.7)",borderRadius:3}]},options:bo});charts["cmpHMLD"]=new Chart(document.getElementById("cmpHMLD"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:s1.name,data:allNames.map(n=>get(s1,n,"hmld")),backgroundColor:"rgba(0,224,122,0.7)",borderRadius:3},{label:s2.name,data:allNames.map(n=>get(s2,n,"hmld")),backgroundColor:"rgba(0,136,255,0.7)",borderRadius:3}]},options:bo});charts["cmpSprint"]=new Chart(document.getElementById("cmpSprint"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:"Low S1",data:allNames.map(n=>get(s1,n,"lsprint")),backgroundColor:"rgba(255,159,28,0.75)",borderRadius:3},{label:"High S1",data:allNames.map(n=>get(s1,n,"hsprint")),backgroundColor:"rgba(255,77,77,0.75)",borderRadius:3},{label:"Low S2",data:allNames.map(n=>get(s2,n,"lsprint")),backgroundColor:"rgba(255,206,112,0.6)",borderRadius:3},{label:"High S2",data:allNames.map(n=>get(s2,n,"hsprint")),backgroundColor:"rgba(255,144,144,0.6)",borderRadius:3}]},options:bo});const hasRPE=s1.players.some(p=>p.rpe!==null)||s2.players.some(p=>p.rpe!==null);if(hasRPE){charts["cmpRPE"]=new Chart(document.getElementById("cmpRPE"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:s1.name,data:allNames.map(n=>get(s1,n,"rpe")),backgroundColor:"rgba(0,224,122,0.7)",borderRadius:3},{label:s2.name,data:allNames.map(n=>get(s2,n,"rpe")),backgroundColor:"rgba(0,136,255,0.7)",borderRadius:3}]},options:{...bo,scales:{x:{min:0,max:10,ticks:{stepSize:1,color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{document.getElementById("cmp-rpe-row").style.display="none";}},50);}
+function renderCompareCharts(){const s1=sessions[sessions.length-2],s2=sessions[sessions.length-1];const allNames=[...new Set([...s1.players.map(p=>p.name),...s2.players.map(p=>p.name)])];const labels=allNames.map(n=>n.split(" ").slice(-1)[0]);const get=(sess,name,key)=>{const p=sess.players.find(x=>x.name===name);return(p&&p[key]!==null)?p[key]:0;};const h=Math.max(200,allNames.length*32+80);["cmpTotal","cmpHMLD","cmpSprint","cmpRPE"].forEach(id=>destroyChart(id));document.getElementById("compare-charts").innerHTML=`<div class="chart-row cols-1"><div class="chart-card"><div class="chart-head"><div class="chart-title">Total distance</div><div class="legend"><div class="leg-item"><div class="leg-dot" style="background:#00e07a"></div>${s1.name}</div><div class="leg-item"><div class="leg-dot" style="background:#0088ff"></div>${s2.name}</div></div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpTotal"></canvas></div></div></div><div class="chart-row cols-2"><div class="chart-card"><div class="chart-head"><div class="chart-title">HMLD</div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpHMLD"></canvas></div></div><div class="chart-card"><div class="chart-head"><div class="chart-title">Sprint zones</div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpSprint"></canvas></div></div></div><div class="chart-row cols-1" id="cmp-rpe-row"><div class="chart-card"><div class="chart-head"><div class="chart-title">RPE comparison</div></div><div class="chart-wrap" style="height:${h}px"><canvas id="cmpRPE"></canvas></div></div></div>`;const bo={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}};setTimeout(()=>{charts["cmpTotal"]=new Chart(document.getElementById("cmpTotal"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:s1.name,data:allNames.map(n=>get(s1,n,"total")),backgroundColor:"rgba(74,173,232,0.7)",borderRadius:3},{label:s2.name,data:allNames.map(n=>get(s2,n,"total")),backgroundColor:"rgba(74,173,232,0.4,0.7)",borderRadius:3}]},options:bo});charts["cmpHMLD"]=new Chart(document.getElementById("cmpHMLD"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:s1.name,data:allNames.map(n=>get(s1,n,"hmld")),backgroundColor:"rgba(74,173,232,0.7)",borderRadius:3},{label:s2.name,data:allNames.map(n=>get(s2,n,"hmld")),backgroundColor:"rgba(74,173,232,0.4,0.7)",borderRadius:3}]},options:bo});charts["cmpSprint"]=new Chart(document.getElementById("cmpSprint"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:"Low S1",data:allNames.map(n=>get(s1,n,"lsprint")),backgroundColor:"rgba(240,120,48,0.75)",borderRadius:3},{label:"High S1",data:allNames.map(n=>get(s1,n,"hsprint")),backgroundColor:"rgba(255,77,77,0.75)",borderRadius:3},{label:"Low S2",data:allNames.map(n=>get(s2,n,"lsprint")),backgroundColor:"rgba(255,206,112,0.6)",borderRadius:3},{label:"High S2",data:allNames.map(n=>get(s2,n,"hsprint")),backgroundColor:"rgba(255,144,144,0.6)",borderRadius:3}]},options:bo});const hasRPE=s1.players.some(p=>p.rpe!==null)||s2.players.some(p=>p.rpe!==null);if(hasRPE){charts["cmpRPE"]=new Chart(document.getElementById("cmpRPE"),{type:"bar",indexAxis:"y",data:{labels,datasets:[{label:s1.name,data:allNames.map(n=>get(s1,n,"rpe")),backgroundColor:"rgba(74,173,232,0.7)",borderRadius:3},{label:s2.name,data:allNames.map(n=>get(s2,n,"rpe")),backgroundColor:"rgba(74,173,232,0.4,0.7)",borderRadius:3}]},options:{...bo,scales:{x:{min:0,max:10,ticks:{stepSize:1,color:GC.color,font:{size:10}},grid:{color:GC.grid}},y:{ticks:{color:GC.color,font:{size:9}},grid:{color:GC.grid}}}}});}else{document.getElementById("cmp-rpe-row").style.display="none";}},50);}
 
 function saveKey(){
   const v=document.getElementById("key-input").value.trim();
@@ -545,7 +1729,7 @@ function renderTrends() {
   if (playerFilter === "all") {
     // All players as thin faint lines + bold team avg
     const allPlayers = [...new Set(trendsData.flatMap(s => s.players.map(p => p.player)))].sort();
-    const playerColors = ["#00e07a","#0088ff","#ff9f1c","#ff4d4d","#534AB7","#D85A30","#1D9E75","#BA7517","#E24B4a","#5DCAA5","#7F77DD","#F0997B","#378ADD","#97C459","#D4537E","#EF9F27","#3B8BD4","#639922","#993556","#85B7EB","#C0DD97","#FAC775","#B5D4F4"];
+    const playerColors = ["#4AADE8","#B8C8E8","#F07830","#E05050","#534AB7","#D85A30","#1D9E75","#BA7517","#E24B4a","#5DCAA5","#7F77DD","#F0997B","#378ADD","#97C459","#D4537E","#EF9F27","#3B8BD4","#639922","#993556","#85B7EB","#C0DD97","#FAC775","#B5D4F4"];
     allPlayers.forEach((name, i) => {
       const data = trendsData.map(s => {
         const p = s.players.find(x => x.player === name);
@@ -585,8 +1769,8 @@ function renderTrends() {
     lineDatasets.push({
       label: playerFilter,
       data: playerData,
-      borderColor: "#00e07a",
-      backgroundColor: "rgba(0,224,122,0.08)",
+      borderColor: "#4AADE8",
+      backgroundColor: "rgba(74,173,232,0.08)",
       borderWidth: 2.5,
       pointRadius: 4,
       tension: 0.3,
@@ -626,7 +1810,7 @@ function renderTrends() {
   const legendEl = document.getElementById("trends-legend");
   if (playerFilter === "all") {
     const allPlayers2 = [...new Set(trendsData.flatMap(s => s.players.map(p => p.player)))].sort();
-    const playerColors2 = ["#00e07a","#0088ff","#ff9f1c","#ff4d4d","#534AB7","#D85A30","#1D9E75","#BA7517","#E24B4a","#5DCAA5","#7F77DD","#F0997B","#378ADD","#97C459","#D4537E","#EF9F27","#3B8BD4","#639922","#993556","#85B7EB","#C0DD97","#FAC775","#B5D4F4"];
+    const playerColors2 = ["#4AADE8","#B8C8E8","#F07830","#E05050","#534AB7","#D85A30","#1D9E75","#BA7517","#E24B4a","#5DCAA5","#7F77DD","#F0997B","#378ADD","#97C459","#D4537E","#EF9F27","#3B8BD4","#639922","#993556","#85B7EB","#C0DD97","#FAC775","#B5D4F4"];
     legendEl.innerHTML = allPlayers2.map((n,i) =>
       `<div class="leg-item"><div class="leg-dot" style="background:${playerColors2[i%playerColors2.length]}"></div>${n.split(" ").slice(-1)[0]}</div>`
     ).join("") + '<div class="leg-item"><div class="leg-dot" style="background:#fff"></div>Team avg</div>';
@@ -640,8 +1824,8 @@ function renderTrends() {
     type: "line",
     data: { labels: sessionLabels, datasets: [{
       data: teamAvg,
-      borderColor: "#0088ff",
-      backgroundColor: "rgba(0,136,255,0.08)",
+      borderColor: "#B8C8E8",
+      backgroundColor: "rgba(74,173,232,0.4,0.08)",
       borderWidth: 2,
       pointRadius: 4,
       tension: 0.3,
@@ -657,7 +1841,7 @@ function renderTrends() {
     type: "bar",
     data: { labels: sessionLabels, datasets: [{
       data: teamPeak,
-      backgroundColor: "rgba(255,159,28,0.7)",
+      backgroundColor: "rgba(240,120,48,0.7)",
       borderRadius: 4,
     }]},
     options: { ...baseLineOpts, plugins: { legend: { display: false } } }
@@ -711,7 +1895,7 @@ function renderTrends() {
 
 
 // ─── PLAYER PAGES MAP ─────────────────────────────────────────────────────────
-const PLAYER_PAGES = {"Adam Luckhurst": "32b4f9fef5998132948dfff6998df1c7", "Ahmad Al Qaq": "32b4f9fef59981509204f07aa09133d9", "Antonio Gomez": "32b4f9fef59981b7bf00e14661c0a1c9", "Brem Soumaoro": "32b4f9fef59981f7bfa0e33995a28cbc", "Dida Armstrong": "32b4f9fef5998175a03cfdd12f12ac8a", "Edgardo Rito": "32b4f9fef59981589b0bd9c3b5dbd4ac", "Emil J\u00e4\u00e4skel\u00e4inen": "32b4f9fef59981df83f0d4a30bb8aa47", "Ethan Dudley": "32b4f9fef59981ff9eebf16a6acccd58", "Harvey Neville": "32b4f9fef59981eeafc2e6889444e40d", "Jack Proctor": "32b4f9fef5998165af5edc70d5b020f8", "Jacob Evans": "32b4f9fef5998171a4f4fc17ecc098e0", "Jordan Rossiter": "32b4f9fef59981a9a210fd2dc5f11f0b", "Kieran Sadlier": "32b4f9fef59981e6a2dde740ce72f0f2", "Luc Granitur": "32b4f9fef599812abc35c3e5e74a4046", "Mo Traore": "32b4f9fef59981a9bb84e4638faf14ee", "Nijah Reid": "32b4f9fef59981fdba1cf0acb0785f12", "Piero Elias": "32b4f9fef59981bfa25dc3764916a5ec", "Raf Pedder": "32b4f9fef59981ba850eee712b229777", "Ryan Edwards": "32b4f9fef599817bb8c6ded2efcf6335", "Tyshawn Rose": "32b4f9fef599814285cdfdcf24ec668a", "Wahab Ackwei": "32b4f9fef599812995d0caa82b0f5f6c", "Wan Kuzain": "32b4f9fef599815c8126c990b03253ce", "Zeke Soto": "32b4f9fef599819bb35ad19a1c8e0d64", "_hub": "32b4f9fef59981b5b728e2b55421a282"};
+const PLAYER_PAGES = {"Adam Luckhurst": "32b4f9fef5998172b86dd263c018d75e", "Ahmad Al Qaq": "32b4f9fef5998186a947d8e3dab488b8", "Antonio Gomez": "32b4f9fef59981aba916c83ba60742e5", "Brem Soumaoro": "32b4f9fef59981f1bf48da045618185a", "Dida Armstrong": "32b4f9fef5998130a946c7b17462f5c6", "Edgardo Rito": "32b4f9fef599818cace1fe2c4302fbc2", "Emil J\u00e4\u00e4skel\u00e4inen": "32b4f9fef599818db6aef7f7759bd7c2", "Ethan Dudley": "32b4f9fef59981e3aa93cf93445ca444", "Harvey Neville": "32b4f9fef59981f09878f2745e899cfb", "Jack Proctor": "32b4f9fef59981a8b364f4bbd92220fa", "Jacob Evans": "32b4f9fef59981e1835cfb864290451c", "Jordan Rossiter": "32b4f9fef599819ead96f69253f3a23c", "Kieran Sadlier": "32b4f9fef59981e9ac93c40b24157455", "Luc Granitur": "32b4f9fef5998116a143cf8ac6f5dc27", "Mo Traore": "32b4f9fef5998167b8a3f3864e125497", "Nijah Reid": "32b4f9fef5998162a437cf81e64bcb21", "Piero Elias": "32b4f9fef599818dbc94fe59e5b698cf", "Raf Pedder": "32b4f9fef5998198abd4dcaff12cd42f", "Ryan Edwards": "32b4f9fef59981cd8b00f23cb8b3a86c", "Tyshawn Rose": "32b4f9fef59981c8b26edac32dfd397a", "Wahab Ackwei": "32b4f9fef59981639e2ccfd8be888415", "Wan Kuzain": "32b4f9fef59981df86e7c317f24f31b3", "Zeke Soto": "32b4f9fef59981ee8371d8d4583f5837"};
 const HUB_PAGE = "32b4f9fef59981b5b728e2b55421a282";
 
 async function appendPlayerPage(playerPageId, pl, sessionName, sessionDate) {

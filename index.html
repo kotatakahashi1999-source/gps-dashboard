@@ -292,6 +292,7 @@ const METRICS = [
 const COL_ALIASES = {
   name:     ['name ','name','athlete name','player name','player'],
   date:     ['date ','date','start date'],
+  segment:  ['segment name','segment'],
   duration: ['duration (mins)','duration'],
   distance: ['distance (m)','distance'],
   mpm:      ['metres per minute (m)','metres per minute','m/min','mpm'],
@@ -385,10 +386,32 @@ function readFile(file){
       const colMap = {};
       for(const m of METRICS) colMap[m.key] = detectCol(headers, m.key);
 
-      // Build player records (deduplicated by name)
+      // Detect segment column (35-col format has 'Segment Name')
+      const segCol = detectCol(headers,'segment');
+
+      // Detect the session date — use the LATEST date found in the file
+      // so uploading a multi-date export still picks up the newest session
+      let latestDate = null;
+      for(const row of rows){
+        const seg = segCol ? (row[segCol]||'').trim() : '';
+        if(seg && seg !== 'Whole Session') continue;
+        const d = parseDate((row[dateCol]||'').trim());
+        if(d && (!latestDate || d > latestDate)) latestDate = d;
+      }
+      const dateStr = latestDate;
+      if(!dateStr){showErr('Could not detect a valid date in CSV');return;}
+
+      // Build player records:
+      // 1. Only use Whole Session rows (skip Match/segment sub-rows)
+      // 2. Only use rows matching the latest date
+      // 3. Deduplicate by player name (keep first occurrence)
       const seen = new Set();
       const players = [];
       for(const row of rows){
+        const seg = segCol ? (row[segCol]||'').trim() : '';
+        if(seg && seg !== 'Whole Session') continue;
+        const rowDate = parseDate((row[dateCol]||'').trim());
+        if(rowDate !== dateStr) continue;
         const name = normName(row[nameCol]||'');
         if(!name||seen.has(name)) continue;
         seen.add(name);
@@ -396,8 +419,6 @@ function readFile(file){
         for(const m of METRICS) rec[m.key] = parseNum(colMap[m.key]?row[colMap[m.key]]:'');
         players.push(rec);
       }
-
-      const dateStr = parseDate((rows[0][dateCol]||'').trim());
 
       // Compute team averages
       const teamAvg = {};
